@@ -49,16 +49,13 @@ func postMove(c *gin.Context) {
 	move, err := chess.MoveFromString(c.Param("move"), board)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := board.MakeMove(move); err != nil {
+	} else if err := board.MakeMove(move); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"fen": board.FEN(),
+		})
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"fen": board.FEN(),
-	})
 }
 
 func Route(router *gin.RouterGroup) {

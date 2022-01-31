@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function Move(props) {
 	const turn = props.turn || 1;
@@ -15,31 +15,22 @@ function Move(props) {
 }
 
 function PGNView(props) {
-	let [moves, setMoves] = useState([{turn: 1}]);
-	let [error, setError] = useState("");
+	const moves = props.moves || [{turn: 1}];
+	const error = props.error || "";
+	const fen = props.fen || "";
+	const onMove = props.onMove;
 	
 	const moveElements = [];
 	for (let move of moves) {
-		moveElements.push(<Move key={move.turn} turn={move.turn} white={move.white} black={move.black} />)
+		moveElements.push(<Move key={move.turn} turn={move.turn} white={move.white} black={move.black} />);
 	}
 
 	const enterMove = e => {
 		if (e.charCode !== 13) return;
-		const san = e.target.value;
-		
-		if (moves.length === 0 || moves[moves.length-1].black) {
-			moves.push({
-				turn: moves.length + 1,
-				white: san,
-			});
-		} else if (moves[moves.length-1].white) {
-			moves[moves.length-1].black = san;
-		} else {
-			moves[moves.length-1].white = san;
+		if (onMove) {
+			onMove(e.target.value);
 		}
-
 		e.target.value = "";
-		setMoves([...moves]);
 	};
 
 	return (
@@ -51,6 +42,9 @@ function PGNView(props) {
 				{ error }
 			</div>
 			<input type="text" onKeyPress={enterMove} placeholder="Type your move" />
+			<div className="fen">
+				{ fen }
+			</div>
 		</div>
 	);
 }

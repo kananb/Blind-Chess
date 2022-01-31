@@ -1,17 +1,17 @@
 import './components/Navbar.css';
-import './components/Home.css';
+import './components/Game.css';
 import './components/PGNView.css';
 import './components/Chessboard.css';
 import './components/Footer.css';
 import Footer from './components/Footer';
-import Home from './components/Home';
+import Game from './components/Game';
 import Navbar from './components/Navbar';
 
 function App() {
   return (
     <div className="App">
 		<Navbar />
-    	<Home />
+    	<Game />
 		<Footer />
     </div>
   );
