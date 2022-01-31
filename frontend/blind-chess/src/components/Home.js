@@ -6,7 +6,7 @@ function Home(props) {
 	return (
 		<div className="Home">
 			<PGNView />
-			<Chessboard />
+			<Chessboard orientation="white" />
 		</div>
 	);
 }
