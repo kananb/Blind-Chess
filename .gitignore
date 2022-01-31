@@ -1,0 +1,21 @@
+# dependencies
+frontend/blind-chess/node_modules
+frontend/blind-chess/.pnp
+frontend/blind-chess/.pnp.js
+
+# testing
+frontend/blind-chess/coverage
+
+# production
+frontend/blind-chess/build
+
+# misc
+frontend/blind-chess/.DS_Store
+frontend/blind-chess/.env.local
+frontend/blind-chess/.env.development.local
+frontend/blind-chess/.env.test.local
+frontend/blind-chess/.env.production.local
+
+frontend/blind-chess/npm-debug.log*
+frontend/blind-chess/yarn-debug.log*
+frontend/blind-chess/yarn-error.log*
