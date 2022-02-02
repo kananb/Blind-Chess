@@ -8,8 +8,10 @@ function Move(props) {
 	return (
 		<div className="Move">
 			<span className="turn">{turn}.</span>
-			<span className="san">{white}</span>
-			<span className="san">{black}</span>
+			<div className="sans">
+				<span className="san">{white}</span>
+				<span className="san">{black}</span>
+			</div>
 		</div>
 	);
 }

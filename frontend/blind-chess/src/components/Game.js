@@ -65,11 +65,8 @@ function Game(props) {
 			} else {
 				res.json()
 				.then(data => {
-					socket.send(JSON.stringify({
-						san: san,
-						fen: data.fen,
-					}));
-					makeMove(san, data.fen);
+					socket.send(JSON.stringify(data));
+					makeMove(data.san, data.fen);
 				});
 			}
 		})

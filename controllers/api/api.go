@@ -12,7 +12,7 @@ func initBoard(c *gin.Context) (board *chess.Board) {
 
 	var err error
 	if fen != "" {
-		board, err = chess.BoardFromString(fen)
+		board, err = chess.NewBoard(fen)
 		if err != nil {
 			c.Status(http.StatusBadRequest)
 		}
@@ -29,11 +29,10 @@ func getMoves(c *gin.Context) {
 		return
 	}
 
-	// var strMoves []string
-	// for move := range board.GenMoves() {
-	// 	strMoves = append(strMoves, move.ToSAN(board))
-	// }
-	moves := board.GenMoves()
+	var moves []string
+	for _, move := range board.Moves() {
+		moves = append(moves, move.String())
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"moves": moves,
 		"count": len(moves),
@@ -46,14 +45,15 @@ func postMove(c *gin.Context) {
 		return
 	}
 
-	move, err := chess.MoveFromString(c.Param("move"), board)
+	move, err := chess.NewMove(c.Param("move"), board)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
-	} else if err := board.MakeMove(move); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+	} else if move = board.MakeMove(move); !move.IsValid() {
+		c.String(http.StatusBadRequest, "Move is invalid")
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"fen": board.FEN(),
+			"fen": board.String(),
+			"san": move.String(),
 		})
 	}
 }

@@ -9,18 +9,22 @@
 .Move .turn {
 	width: 2em;
 	max-width: 2em;
-	margin-left: 0.5em;
+	margin: 0 2em 0 0.5em;
 
 	text-align: left;
 
 	color: #A8A8A8;
 }
+.Move .sans {
+	display: flex;
+	
+	flex-grow: 1;
+}
 .Move .san {
 	font-weight: bold;
 	text-align: left;
 	
-	flex-grow: 1;
-	margin: 0 2em;
+	width: 50%;
 
 	color:#D8D8D8;
 }
