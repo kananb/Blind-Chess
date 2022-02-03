@@ -65,3 +65,11 @@
 
 	color: #c4c4c4;
 }
+
+.code {
+	text-align: center;
+	font-size: 18px;
+	font-weight: bold;
+	
+	color:#ececec;
+}

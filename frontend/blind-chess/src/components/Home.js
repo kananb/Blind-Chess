@@ -5,7 +5,7 @@ import Chessboard from './Chessboard';
 
 function Home(props) {
 	const [conn, setConn] = useState(null);
-	const [id, setId] = useState(undefined);
+	const [code, setCode] = useState(undefined);
 
 	useEffect(() => {
 		let socket = new WebSocket("ws://localhost:8080/game");
@@ -29,15 +29,15 @@ function Home(props) {
 	}, []);
 
 	const handleJoin = id => {
-		setId(id);
+		setCode(id);
 	};
 	const handleLeave = () => {
-		setId(undefined);
+		setCode(undefined);
 	};
 
-	const interact = (id) ?
+	const interact = (code) ?
 		(
-			<Game conn={conn} id={id} />
+			<Game conn={conn} code={code} />
 		) :
 		(
 			<Menu conn={conn} onJoin={handleJoin} />

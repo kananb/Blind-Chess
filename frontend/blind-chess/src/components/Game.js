@@ -18,6 +18,7 @@ function Move(props) {
 
 function Game(props) {
 	const conn = props.conn || null;
+	const code = props.code || undefined;
 	const [game, setGame] = useState({
 		moves: [{turn: 1}],
 		error: "",
@@ -88,6 +89,13 @@ function Game(props) {
 		e.target.value = "";
 	};
 
+	const info = (game.fen) ?
+		(
+			<a className="fen" href={`https://lichess.org/analysis/standard/${game.fen}`} target="_blank" rel="noopener noreferrer">{game.fen}</a>
+		) :
+		(
+			<span className="code">room code: { code }</span>
+		);
 	return (
 		<div className="Game">
 			<div className="moves">
@@ -97,7 +105,7 @@ function Game(props) {
 				{ game.error }
 			</div>
 			<input type="text" onKeyPress={enterMove} placeholder="Type your move" />
-			<a className="fen" href={`https://lichess.org/analysis/standard/${game.fen}`} target="_blank" rel="noopener noreferrer">{game.fen}</a>
+			{ info }
 		</div>
 	);
 }
