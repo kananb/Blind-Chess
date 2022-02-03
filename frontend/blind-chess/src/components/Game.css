@@ -1,7 +1,67 @@
-.Game {
+.Move {
+	width: 100%;
+	height: 30px;
+
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+.Move .turn {
+	width: 2em;
+	max-width: 2em;
+	margin: 0 2em 0 0.5em;
+
+	text-align: left;
+
+	color: #A8A8A8;
+}
+.Move .sans {
+	display: flex;
 	
+	flex-grow: 1;
+}
+.Move .san {
+	font-weight: bold;
+	text-align: left;
+	
+	width: 50%;
+
+	color:#D8D8D8;
+}
+
+.Game {
 	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.moves {
+	flex-grow: 1;
+	
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+.moves .Move:nth-child(odd) {
+	background-color: #2D2C2A;
+}
+.Move {
+	border-radius: 5px;
+}
+
+.Game .error {
+	text-align: center;
+	
+	margin: 0.5em 1em;
+}
+
+.fen {
+	text-align: center;
+	font-size: 15px;
+
+	margin-top: 0.5em;
+
+	color: #c4c4c4;
 }

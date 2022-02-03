@@ -1,0 +1,57 @@
+.Menu {
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.matchmaking {
+	width: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.info {
+	font-size: 16px;
+	
+	width: 80%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.Menu h2 {
+	font-size: 24px;
+
+	margin: 1em 0;
+}
+
+.joinForm {
+	width: 70%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.joinForm input {
+	text-align: center;
+
+	margin: 0.2em 0;
+}
+.join {
+	width: 100%;
+}
+
+.create {
+	width: 70%;
+	margin-top: 1em;
+}

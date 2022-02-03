@@ -1,15 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import PGNView from './PGNView';
-import Chessboard from './Chessboard';
+import React, { useState } from 'react';
+
+function Move(props) {
+	const turn = props.turn || 1;
+	const white = props.white || "";
+	const black = props.black || "";
+
+	return (
+		<div className="Move">
+			<span className="turn">{turn}.</span>
+			<div className="sans">
+				<span className="san">{white}</span>
+				<span className="san">{black}</span>
+			</div>
+		</div>
+	);
+}
 
 function Game(props) {
-	let socket;
-	let [game, setGame] = useState({
+	const conn = props.conn || null;
+	const [game, setGame] = useState({
 		moves: [{turn: 1}],
 		error: "",
 		myTurn: true,
 		fen: "",
 	});
+
+	if (conn) {
+		conn.onmessage = e => {
+			game.myTurn = !game.myTurn;
+			setGame({...game});
+		};
+	}
+	
+	const moveElements = [];
+	for (let move of game.moves) {
+		moveElements.push(<Move key={move.turn} turn={move.turn} white={move.white} black={move.black} />);
+	}
 
 	const makeMove = (san, fen, error="") => {
 		game.error = error;
@@ -30,27 +56,12 @@ function Game(props) {
 
 		setGame({...game});
 	};
-
-	useEffect(() => {
-		try {
-			socket = new WebSocket("ws://localhost:8080/game");
-		} catch (err) {
-			console.log("Couldn't establish connection to server");
-			return;
-		}
-
-		socket.onopen = () => {
-			console.log("Opened websocket connection");
-		};
-
-		socket.onmessage = e => {
-			game.myTurn = true;
-			setGame({...game});
-		};
-	});
-
-	const onMove = san => {
-		if (!socket || socket.readyState !== WebSocket.OPEN || !game.myTurn) return;
+	
+	const enterMove = e => {
+		if (e.charCode !== 13) return;
+		const san = e.target.value;
+		
+		if (!conn || conn.readyState !== WebSocket.OPEN || !game.myTurn) return;
 
 		fetch(`http://localhost:8080/api/moves/${san}?fen=${game.fen}`, {
 			mode: "cors",
@@ -65,7 +76,7 @@ function Game(props) {
 			} else {
 				res.json()
 				.then(data => {
-					socket.send(JSON.stringify(data));
+					conn.send(JSON.stringify(data));
 					makeMove(data.san, data.fen);
 				});
 			}
@@ -73,12 +84,20 @@ function Game(props) {
 		.catch(err => {
 			console.log(err);
 		});
+
+		e.target.value = "";
 	};
 
 	return (
 		<div className="Game">
-			<PGNView moves={[...game.moves]} error={game.error} fen={game.fen} onMove={onMove} />
-			<Chessboard orientation="white" />
+			<div className="moves">
+				{ moveElements }
+			</div>
+			<div className="error">
+				{ game.error }
+			</div>
+			<input type="text" onKeyPress={enterMove} placeholder="Type your move" />
+			<a className="fen" href={`https://lichess.org/analysis/standard/${game.fen}`} target="_blank" rel="noopener noreferrer">{game.fen}</a>
 		</div>
 	);
 }
