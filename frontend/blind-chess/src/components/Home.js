@@ -37,7 +37,7 @@ function Home(props) {
 
 	const interact = (code) ?
 		(
-			<Game conn={conn} code={code} />
+			<Game conn={conn} code={code} onLeave={handleLeave} />
 		) :
 		(
 			<Menu conn={conn} onJoin={handleJoin} />
