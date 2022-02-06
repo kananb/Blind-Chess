@@ -46,6 +46,9 @@ input {
 input.error {
 	outline: 2px solid var(--error);
 }
+input.prompt {
+	outline: 2px solid var(--primary);
+}
 
 button {
 	font-size: 15px;

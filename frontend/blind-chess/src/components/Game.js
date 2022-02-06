@@ -17,29 +17,32 @@ function Move(props) {
 }
 
 function Game(props) {
-	const conn = props.conn || null;
-	const code = props.code || undefined;
+	const {conn, code} = props;
+	const onLeave = props.onLeave || (() => {});
 	const [game, setGame] = useState({
 		History: [""],
 		Error: "",
 		Side: "",
 		SideToMove: "",
 		FEN: "",
+		Loser: "",
 	});
 	
 	const moveElements = [];
 	let turn = 1;
+	if (game.History.length === 0) game.History = [""];
 	for (let i = 0; i < game.History.length; i += 2, turn++) {
 		moveElements.push(<Move key={turn} turn={turn} white={game.History[i]} black={(i + 1 < game.History.length) ? game.History[i + 1] : ""} />);
 	}
 	
 	const updateGame = (state) => {
 		setGame({
-			History: state.History || game.History || [""],
+			History: state.History || game.History,
 			Error: state.Error || "",
 			Side: state.Side || game.Side,
 			SideToMove: state.SideToMove || game.SideToMove,
 			FEN: state.FEN || game.FEN,
+			Loser: state.Loser || game.Loser,
 		});
 	};
 	if (conn) {
@@ -70,22 +73,50 @@ function Game(props) {
 		e.target.value = "";
 	};
 
-	const info = (game.FEN) ?
-		(
-			<a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>
-		) :
-		(
-			<span className="code">room code: { code }</span>
+	let info = undefined;
+	if (game.FEN) {
+		info = <a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>;
+	} else {
+		info = <span className="code">room code: { code }</span>;
+	}
+
+	let input = undefined;
+	if (game.Loser) {
+		input = <input type="text" onKeyPress={enterMove} placeholder="Game over" disabled />;
+	} else if (!game.FEN) {
+		input = <input type="text" onKeyPress={enterMove} placeholder="Waiting for game to start" disabled />;
+	} else if (game.Side === game.SideToMove) {
+		input = <input className="prompt" type="text" onKeyPress={enterMove} placeholder="Type your move" />;
+	} else {
+		input = <input type="text" onKeyPress={enterMove} placeholder="Waiting for opponent" disabled />;
+	}
+
+	let notification = undefined;
+	if (game.Loser) {
+		notification = (
+			<div className="notification">
+				<h3>Game Over</h3>
+				{ (game.Loser !== game.Side) ? "You won!!" : "You lost :(" }
+			</div>
 		);
+	}
+
 	return (
 		<div className="Game">
+			{ notification }
 			<div className="moves">
 				{ moveElements }
 			</div>
 			<div className="error">
 				{ game.Error }
 			</div>
-			<input type="text" onKeyPress={enterMove} placeholder="Type your move" />
+			<div className="controls">
+				{ input }
+				<button className="leave" onClick={() => {
+					conn.send("QUIT");
+					onLeave();
+				}}>Leave</button>
+			</div>
 			{ info }
 		</div>
 	);

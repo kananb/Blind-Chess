@@ -56,13 +56,11 @@ func (r *gameRoom) Leave(p *player) {
 }
 
 func (r *gameRoom) Broadcast(cmd string, args ...string) {
-	comms := []communicator{
-		{r.players[0].Conn},
-		{r.players[1].Conn},
-	}
-
-	for _, comm := range comms {
-		comm.send(cmd, args...)
+	for _, p := range r.players {
+		if p == nil {
+			continue
+		}
+		communicator{p.Conn}.send(cmd, args...)
 	}
 }
 

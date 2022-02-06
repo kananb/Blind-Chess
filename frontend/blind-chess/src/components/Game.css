@@ -30,12 +30,41 @@
 }
 
 .Game {
+	position: relative;
 	width: 100%;
 	height: 100%;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+}
+
+.notification {
+	text-align: center;
+	position: absolute;
+	width: 80%;
+	padding: 1em 0;
+	
+	display: flex;
+	flex-direction: column;
+	align-self: center;
+
+	border-radius: 5px;
+
+	background-color: var(--dark);
+}
+.notification h3 {
+	margin-bottom: 0.5em;
+	
+	color: var(--primary);
+}
+.notification .message {
+	width: 100%;
+	flex-grow: 1;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .moves {
@@ -55,6 +84,14 @@
 	text-align: center;
 	
 	margin: 0.5em 1em;
+}
+
+.controls {
+	display: flex;
+	justify-content: center;
+}
+.leave {
+	margin-left: 0.2em;
 }
 
 .fen {

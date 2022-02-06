@@ -26,33 +26,51 @@ var manager = newRoomManager()
 func manageGame(room *gameRoom) {
 	room.Board = chess.StartingPosition()
 	var moves []chess.Move
+
+	var latestState []byte
 	current := false
+	loser := chess.SideColor(0)
 
 	type boardInfo struct {
 		FEN        string
 		SideToMove string
 		History    []string
+		Loser      string
 	}
 
 	colors := [2]chess.SideColor{}
 	colors[0] = chess.SideColor(rand.Intn(2) + 1)
 	colors[1] = ^colors[0] & 3
 
+	tellColors := func(i int) {
+		if room.players[i] != nil {
+			communicator{room.players[i].Conn}.send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[i]))
+		}
+	}
+	tellColors(0)
+	tellColors(1)
+
 gameLoop:
 	for {
 		if !current {
+			moves = room.Board.Moves()
+			if room.Board.InCheckmate() {
+				loser = room.Board.SideToMove
+			}
+
 			state, err := json.Marshal(boardInfo{
 				room.Board.String(),
 				room.Board.SideToMove.String(),
 				room.Board.History(),
+				loser.String(),
 			})
 			if err != nil {
 				fmt.Println(err)
 				break
 			}
-			go room.Broadcast("STATE", string(state))
 
-			moves = room.Board.Moves()
+			go room.Broadcast("STATE", string(state))
+			latestState = state
 			current = true
 		}
 
@@ -72,8 +90,12 @@ gameLoop:
 			}
 		}
 
-		if msg.Cmd == "QUIT" {
-			go room.Broadcast("END")
+		if (loser.IsValid() || msg.Cmd == "UPDATE") && msg.Cmd != "QUIT" {
+			tellColors(from)
+			communicator{room.players[from].Conn}.send("STATE", string(latestState))
+		} else if msg.Cmd == "QUIT" {
+			loser = colors[from]
+			current = false
 		} else if colors[from] != room.Board.SideToMove {
 			communicator{room.players[from].Conn}.send("ERROR", "not your turn")
 		} else if msg.Cmd == "MOVE" {
@@ -157,6 +179,10 @@ awaitGame:
 	}
 
 	room := manager.get(code)
+	if room.Started {
+		p.ch <- &message{Cmd: "UPDATE"}
+	}
+
 	for {
 		msg, err := comm.receive()
 		if err != nil {
