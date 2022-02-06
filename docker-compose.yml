@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: web-server
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      - PORT=${PORT}

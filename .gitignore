@@ -21,3 +21,4 @@ frontend/blind-chess/yarn-debug.log*
 frontend/blind-chess/yarn-error.log*
 
 *.exe
+.env
