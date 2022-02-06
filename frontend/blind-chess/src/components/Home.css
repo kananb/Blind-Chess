@@ -4,15 +4,27 @@
 	align-items: center;
 	
 	width: 100%;
+	padding: 0 1em;
+	column-gap: 2em;
 }
 
 .container {
 	font-size: 18px;
+
 	width: 350px;
+	min-width: 350px;
 	height: 700px;
-	margin: 0 1em;
+	min-height: 700px;
+	margin-bottom: 1em;
 	padding: 10px;
 
 	border-radius: 5px;
 	background-color: var(--darker);
+}
+
+
+@media screen and (max-width: 900px) {
+	.Home {
+		flex-direction: column;
+	}
 }

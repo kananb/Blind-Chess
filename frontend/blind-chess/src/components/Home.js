@@ -8,7 +8,8 @@ function Home(props) {
 	const [code, setCode] = useState(undefined);
 
 	useEffect(() => {
-		let socket = new WebSocket("ws://localhost:80/game");
+		let socket = new WebSocket(`ws://${window.location.host}/game`);
+		console.log(`host: ${window.location.host}`);
 
 		socket.onopen = () => {
 			console.log("Opened websocket connection");
