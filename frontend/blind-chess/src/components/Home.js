@@ -36,7 +36,7 @@ function Home(props) {
 		setCode(undefined);
 	};
 
-	const interact = (code) ?
+	const interact = (!code) ?
 		(
 			<Game conn={conn} code={code} onLeave={handleLeave} />
 		) :

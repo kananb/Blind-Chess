@@ -24,7 +24,7 @@ function Game(props) {
 		Error: "",
 		Side: "",
 		SideToMove: "",
-		FEN: "",
+		FEN: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 		Loser: "",
 	});
 	
@@ -53,7 +53,6 @@ function Game(props) {
 				args: split.slice(1),
 			};
 
-			console.log(msg);
 			if (msg.cmd === "END") {
 
 			} else if (msg.cmd === "ERROR") {
@@ -113,7 +112,7 @@ function Game(props) {
 			<div className="controls">
 				{ input }
 				<button className="leave" onClick={() => {
-					conn.send("QUIT");
+					if (conn) conn.send("QUIT");
 					onLeave();
 				}}>Leave</button>
 			</div>
