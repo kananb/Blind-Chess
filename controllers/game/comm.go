@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -30,18 +31,25 @@ type communicator struct {
 	conn *websocket.Conn
 }
 
-func (c communicator) send(code string, args ...string) {
+func (c communicator) send(cmd string, args ...string) error {
+	if c.conn == nil {
+		return fmt.Errorf("connection is nil")
+	}
 	buf := bytes.Buffer{}
 
-	buf.WriteString(code)
+	buf.WriteString(cmd)
 	for _, arg := range args {
 		buf.WriteString("_" + arg)
 	}
 
-	c.conn.WriteMessage(websocket.TextMessage, buf.Bytes())
+	return c.conn.WriteMessage(websocket.TextMessage, buf.Bytes())
 }
 
 func (c communicator) receive() (*message, error) {
+	if c.conn == nil {
+		return nil, fmt.Errorf("connection is nil")
+	}
+
 	_, data, err := c.conn.ReadMessage()
 	if err != nil {
 		return nil, err

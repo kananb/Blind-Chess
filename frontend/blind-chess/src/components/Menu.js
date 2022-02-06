@@ -17,6 +17,7 @@ function Menu(props) {
 			if (msg.cmd === "DENY") {
 				setError(msg.args[0]);
 			} else if (msg.cmd === "CODE") {
+				conn.send("OK");
 				onJoin(msg.args[0]);
 			} else {
 				console.error(msg);

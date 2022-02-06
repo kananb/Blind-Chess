@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/websocket v1.4.2
-	github.com/kananb/chess v0.0.0-20220202014315-c9674b43f9a5
+	github.com/kananb/chess v0.0.0-20220203194525-d182e59f40d0
 	github.com/rs/cors/wrapper/gin v0.0.0-20211222042454-bf1dbac76afe
 )
 

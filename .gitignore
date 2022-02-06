@@ -19,3 +19,5 @@ frontend/blind-chess/.env.production.local
 frontend/blind-chess/npm-debug.log*
 frontend/blind-chess/yarn-debug.log*
 frontend/blind-chess/yarn-error.log*
+
+*.exe

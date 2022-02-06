@@ -20,78 +20,59 @@ function Game(props) {
 	const conn = props.conn || null;
 	const code = props.code || undefined;
 	const [game, setGame] = useState({
-		moves: [{turn: 1}],
-		error: "",
-		myTurn: true,
-		fen: "",
+		History: [""],
+		Error: "",
+		Side: "",
+		SideToMove: "",
+		FEN: "",
 	});
-
-	if (conn) {
-		conn.onmessage = e => {
-			game.myTurn = !game.myTurn;
-			setGame({...game});
-		};
-	}
 	
 	const moveElements = [];
-	for (let move of game.moves) {
-		moveElements.push(<Move key={move.turn} turn={move.turn} white={move.white} black={move.black} />);
+	let turn = 1;
+	for (let i = 0; i < game.History.length; i += 2, turn++) {
+		moveElements.push(<Move key={turn} turn={turn} white={game.History[i]} black={(i + 1 < game.History.length) ? game.History[i + 1] : ""} />);
 	}
-
-	const makeMove = (san, fen, error="") => {
-		game.error = error;
-
-		if (san && fen) {
-			const last = game.moves.length - 1;
-			if (game.moves[last].black) {
-				game.moves.push({turn: game.moves.length+1, white: san});
-			} else if (game.moves[last].white) {
-				game.moves[last].black = san;
-			} else {
-				game.moves[last].white = san;
-			}
-
-			game.fen = fen;
-			game.myTurn = !game.myTurn;
-		}
-
-		setGame({...game});
-	};
 	
+	const updateGame = (state) => {
+		setGame({
+			History: state.History || game.History || [""],
+			Error: state.Error || "",
+			Side: state.Side || game.Side,
+			SideToMove: state.SideToMove || game.SideToMove,
+			FEN: state.FEN || game.FEN,
+		});
+	};
+	if (conn) {
+		conn.onmessage = e => {
+			const split = e.data.split("_");
+			let msg = {
+				cmd: split[0],
+				args: split.slice(1),
+			};
+
+			console.log(msg);
+			if (msg.cmd === "END") {
+
+			} else if (msg.cmd === "ERROR") {
+				updateGame({Error: msg.args[0]});
+			} else if (msg.cmd === "STATE") {
+				updateGame(JSON.parse(msg.args[0]));
+			}
+		};
+	}
 	const enterMove = e => {
 		if (e.charCode !== 13) return;
 		const san = e.target.value;
 		
-		if (!conn || conn.readyState !== WebSocket.OPEN || !game.myTurn) return;
-
-		fetch(`http://localhost:8080/api/moves/${san}?fen=${game.fen}`, {
-			mode: "cors",
-			method: "POST",
-		})
-		.then(res => {
-			if (!res.ok) {
-				res.text()
-				.then(data => {
-					makeMove(null, null, data);
-				});
-			} else {
-				res.json()
-				.then(data => {
-					conn.send(JSON.stringify(data));
-					makeMove(data.san, data.fen);
-				});
-			}
-		})
-		.catch(err => {
-			console.log(err);
-		});
+		if (!conn || conn.readyState !== WebSocket.OPEN) return;
+		conn.send(`MOVE_${san}`);
 
 		e.target.value = "";
 	};
 
-	const info = (game.fen) ?
+	const info = (game.FEN) ?
 		(
-			<a className="fen" href={`https://lichess.org/analysis/standard/${game.fen}`} target="_blank" rel="noopener noreferrer">{game.fen}</a>
+			<a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>
 		) :
 		(
 			<span className="code">room code: { code }</span>
@@ -102,7 +83,7 @@ function Game(props) {
 				{ moveElements }
 			</div>
 			<div className="error">
-				{ game.error }
+				{ game.Error }
 			</div>
 			<input type="text" onKeyPress={enterMove} placeholder="Type your move" />
 			{ info }
