@@ -2,22 +2,18 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/kananb/blind-chess/controllers/game"
-	cors "github.com/rs/cors/wrapper/gin"
 )
 
 func main() {
-	// gin.SetMode(gin.ReleaseMode)
-	os.Setenv("PORT", "80")
+	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
 	staticPath := "./frontend/blind-chess/build/"
 
-	router.Use(cors.AllowAll())
 	router.Use(static.Serve("/", static.LocalFile(staticPath, true)))
 
 	// route websockets

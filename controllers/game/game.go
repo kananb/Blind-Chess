@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -15,10 +14,6 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// remove this function assignment outside of testing
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }
 
 var manager = newRoomManager()
