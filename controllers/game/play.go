@@ -49,7 +49,7 @@ func awaitMessage(room *gameRoom) (msg *message, from int) {
 
 func manageGame(room *gameRoom) {
 	room.Board = chess.StartingPosition()
-	state := gameState{}
+	state := gameState{WhiteClock: 6000, BlackClock: 6000}
 	colors := [2]chess.SideColor{}
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -58,6 +58,10 @@ func manageGame(room *gameRoom) {
 	room.Users[0].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[0].String()))
 	room.Users[1].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[1].String()))
 
+	turn := struct {
+		Color      chess.SideColor
+		start, end int64
+	}{room.Board.SideToMove, time.Now().UnixMilli(), 0}
 gameLoop:
 	for {
 		if !state.current {
@@ -69,6 +73,17 @@ gameLoop:
 				state.Loser = "-"
 				state.gameOver = true
 			}
+
+			turn.end = time.Now().UnixMilli()
+			elapsed := int(turn.end-turn.start) / 100 // turn time elapsed in deciseconds
+			turn.start = turn.end
+
+			if turn.Color == chess.White {
+				state.WhiteClock -= elapsed
+			} else {
+				state.BlackClock -= elapsed
+			}
+			turn.Color = room.Board.SideToMove
 
 			state.FEN = room.Board.String()
 			state.SideToMove = room.Board.SideToMove.String()

@@ -29,29 +29,41 @@ function Game(props) {
 		WhiteClock: 0,
 		BlackClock: 0,
 	});
+	const interval = useRef(0);
 	const whiteTime = useRef(undefined);
 	const blackTime = useRef(undefined);
-
 	const inputRef = useRef(undefined);
 	const moveRef = useRef(undefined);
+
+	const updateClocks = () => {
+		let min, sec;
+		if (whiteTime.current) {
+			min = "0" + Math.floor(game.WhiteClock / 600);
+			sec = "0" + Math.floor(game.WhiteClock / 10 % 60);
+			whiteTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
+		}
+		if (blackTime.current) {
+			min = "0" + Math.floor(game.BlackClock / 600);
+			sec = "0" + Math.floor(game.BlackClock / 10 % 60);
+			blackTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
+		}
+	};
 
 	useEffect(() => {
 		if (!inputRef.current.disabled) inputRef.current.focus();
 		moveRef.current.scrollTop = moveRef.current.scrollHeight;
-	}, [game]);
+		updateClocks();
 
-	// useEffect(() => {
-	// 	const countdown = () => {
-	// 		setTimeout(() => {
-	// 			game.WhiteTime -= 1;
-	// 			const min = "0" + Math.floor(game.WhiteTime / 600);
-	// 			const sec = "0" + Math.floor(game.WhiteTime / 10 % 60);
-	// 			whiteTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
-	// 			if (game.WhiteTime > 0) countdown();
-	// 		}, 100);
-	// 	};
-	// 	countdown();
-	// });
+		clearInterval(interval.current);
+		if (game.Loser || !game.FEN) return;
+
+		interval.current = setInterval((color) => {
+			if (color === "w") game.WhiteClock--;
+			else game.BlackClock--;
+
+			updateClocks();
+		}, 100, game.SideToMove);
+	}, [game]);
 	
 	const moveElements = [];
 	let turn = 1;
@@ -119,10 +131,10 @@ function Game(props) {
 		<div className="Game">
 			{ notification }
 			<div className="clocks">
-				<div className="timer active">
+				<div className={"timer " + ((game.SideToMove === "w") ? "active" : "")}>
 					<span ref={whiteTime} className="time"></span>
 				</div>
-				<div className="timer">
+				<div className={"timer " + ((game.SideToMove === "b") ? "active" : "")}>
 					<span ref={blackTime} className="time"></span>
 				</div>
 			</div>
