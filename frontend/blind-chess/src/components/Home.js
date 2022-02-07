@@ -9,7 +9,6 @@ function Home(props) {
 
 	useEffect(() => {
 		let socket = new WebSocket(`ws://${window.location.host}/game`);
-		console.log(`host: ${window.location.host}`);
 
 		socket.onopen = () => {
 			console.log("Opened websocket connection");

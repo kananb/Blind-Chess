@@ -26,16 +26,19 @@ function Game(props) {
 		SideToMove: "",
 		FEN: "",
 		Loser: "",
-		WhiteTime: 50,
-		BlackTime: 3140,
+		WhiteClock: 0,
+		BlackClock: 0,
 	});
 	const whiteTime = useRef(undefined);
 	const blackTime = useRef(undefined);
 
-	/*
-	auto scroll dowwn on moves
-	focus input on turn
-	*/
+	const inputRef = useRef(undefined);
+	const moveRef = useRef(undefined);
+
+	useEffect(() => {
+		if (!inputRef.current.disabled) inputRef.current.focus();
+		moveRef.current.scrollTop = moveRef.current.scrollHeight;
+	}, [game]);
 
 	// useEffect(() => {
 	// 	const countdown = () => {
@@ -58,14 +61,7 @@ function Game(props) {
 	}
 	
 	const updateGame = (state) => {
-		setGame({
-			History: state.History || game.History,
-			Error: state.Error || "",
-			Side: state.Side || game.Side,
-			SideToMove: state.SideToMove || game.SideToMove,
-			FEN: state.FEN || game.FEN,
-			Loser: state.Loser || game.Loser,
-		});
+		setGame({...Object.assign(game, state)});
 	};
 	if (conn) {
 		conn.onmessage = e => {
@@ -101,23 +97,20 @@ function Game(props) {
 		info = <span className="code">room code: { code }</span>;
 	}
 
-	let input = undefined;
-	if (game.Loser) {
-		input = <input type="text" onKeyPress={enterMove} placeholder="Game over" disabled />;
-	} else if (!game.FEN) {
-		input = <input type="text" onKeyPress={enterMove} placeholder="Waiting for game to start" disabled />;
-	} else if (game.Side === game.SideToMove) {
-		input = <input className="prompt" type="text" onKeyPress={enterMove} placeholder="Type your move" />;
-	} else {
-		input = <input type="text" onKeyPress={enterMove} placeholder="Waiting for opponent" disabled />;
-	}
+	let placeholder, prompt = false;
+	if (game.Loser) placeholder = "Game over";
+	else if (!game.FEN) placeholder = "Waiting for game to start";
+	else if (game.Side === game.SideToMove) {
+		placeholder = "Type your move";
+		prompt = true;
+	} else placeholder = "Waiting for opponent";
 
 	let notification = undefined;
 	if (game.Loser) {
 		notification = (
 			<div className="notification">
 				<h3>Game Over</h3>
-				{ (game.Loser !== game.Side) ? "You won!!" : "You lost :(" }
+				{ (game.Loser === game.Side) ? "You lost :(" : (game.Loser === "-") ? "It's a draw" : "You won!" }
 			</div>
 		);
 	}
@@ -133,14 +126,14 @@ function Game(props) {
 					<span ref={blackTime} className="time"></span>
 				</div>
 			</div>
-			<div className="moves">
+			<div ref={moveRef} className="moves">
 				{ moveElements }
 			</div>
 			<div className="error">
 				{ game.Error }
 			</div>
 			<div className="controls">
-				{ input }
+				<input ref={inputRef} className={prompt ? "prompt" : ""} type="text" onKeyPress={enterMove} placeholder={placeholder} disabled={!prompt} />
 				<button className="leave" onClick={() => {
 					if (conn) conn.send("QUIT");
 					onLeave();

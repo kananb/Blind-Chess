@@ -50,7 +50,7 @@ function Menu(props) {
 				<h2>Start playing</h2>
 				<form className="joinForm" onSubmit={handleJoin}>
 					<span className="error">{ error }</span>
-					<input ref={ code } className="" type="text" placeholder="Enter a room code" />
+					<input ref={ code } className="" type="text" placeholder="Enter a room code" autoFocus />
 					<button className="join" type="submit">Join a game</button>
 				</form>
 				<button className="create" onClick={handleCreate}>Create a game</button>
