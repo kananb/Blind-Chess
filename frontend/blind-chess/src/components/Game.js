@@ -38,14 +38,14 @@ function Game(props) {
 	const updateClocks = () => {
 		let min, sec;
 		if (whiteTime.current) {
-			min = "0" + Math.floor(game.WhiteClock / 600);
-			sec = "0" + Math.floor(game.WhiteClock / 10 % 60);
-			whiteTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
+			min = "0" + Math.floor(Math.abs(game.WhiteClock) / 600);
+			sec = "0" + Math.floor(Math.abs(game.WhiteClock) / 10 % 60);
+			whiteTime.current.innerText = `${(game.WhiteClock < 0) ? "-" : ""}${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
 		}
 		if (blackTime.current) {
-			min = "0" + Math.floor(game.BlackClock / 600);
-			sec = "0" + Math.floor(game.BlackClock / 10 % 60);
-			blackTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
+			min = "0" + Math.floor(Math.abs(game.BlackClock) / 600);
+			sec = "0" + Math.floor(Math.abs(game.BlackClock) / 10 % 60);
+			blackTime.current.innerText = `${(game.BlackClock < 0) ? "-" : ""}${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
 		}
 	};
 
@@ -62,7 +62,7 @@ function Game(props) {
 			else game.BlackClock--;
 
 			updateClocks();
-		}, 100, game.SideToMove);
+		}, 95, game.SideToMove);
 	}, [game]);
 	
 	const moveElements = [];
@@ -73,6 +73,7 @@ function Game(props) {
 	}
 	
 	const updateGame = (state) => {
+		game.Error = "";
 		setGame({...Object.assign(game, state)});
 	};
 	if (conn) {
