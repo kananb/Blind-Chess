@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function Move(props) {
 	const turn = props.turn || 1;
@@ -24,9 +24,31 @@ function Game(props) {
 		Error: "",
 		Side: "",
 		SideToMove: "",
-		FEN: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+		FEN: "",
 		Loser: "",
+		WhiteTime: 50,
+		BlackTime: 3140,
 	});
+	const whiteTime = useRef(undefined);
+	const blackTime = useRef(undefined);
+
+	/*
+	auto scroll dowwn on moves
+	focus input on turn
+	*/
+
+	// useEffect(() => {
+	// 	const countdown = () => {
+	// 		setTimeout(() => {
+	// 			game.WhiteTime -= 1;
+	// 			const min = "0" + Math.floor(game.WhiteTime / 600);
+	// 			const sec = "0" + Math.floor(game.WhiteTime / 10 % 60);
+	// 			whiteTime.current.innerText = `${min.substring(min.length-2)}:${sec.substring(sec.length-2)}`;
+	// 			if (game.WhiteTime > 0) countdown();
+	// 		}, 100);
+	// 	};
+	// 	countdown();
+	// });
 	
 	const moveElements = [];
 	let turn = 1;
@@ -103,6 +125,14 @@ function Game(props) {
 	return (
 		<div className="Game">
 			{ notification }
+			<div className="clocks">
+				<div className="timer active">
+					<span ref={whiteTime} className="time"></span>
+				</div>
+				<div className="timer">
+					<span ref={blackTime} className="time"></span>
+				</div>
+			</div>
 			<div className="moves">
 				{ moveElements }
 			</div>

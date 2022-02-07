@@ -1,7 +1,8 @@
 :root {
 	--primary: #46a8af; /* #6ab293 */
-	--dark: #2D2C2A;
-	--darker: #252422;
+	--dark: #424240;
+	--darker: #2D2C2A;
+	--darkest: #252422;
 	--error: #ff4128;
 	
 	--board-light: #e8e8e8;
@@ -15,7 +16,7 @@
 }
 
 html {
-	background-color: var(--dark);
+	background-color: var(--darker);
 }
 
 body {

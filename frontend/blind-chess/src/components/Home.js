@@ -36,13 +36,12 @@ function Home(props) {
 		setCode(undefined);
 	};
 
-	const interact = (!code) ?
-		(
-			<Game conn={conn} code={code} onLeave={handleLeave} />
-		) :
-		(
-			<Menu conn={conn} onJoin={handleJoin} />
-		);
+	let interact = undefined;
+	if (code) {
+		interact = <Game conn={conn} code={code} onLeave={handleLeave} />;
+	} else {
+		interact = <Menu conn={conn} onJoin={handleJoin} />;
+	}
 
 	return (
 		<div className="Home">
