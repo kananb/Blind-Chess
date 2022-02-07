@@ -8,67 +8,66 @@ import (
 	"github.com/kananb/chess"
 )
 
-type player struct {
-	Conn *websocket.Conn
-	ch   chan *message
+type user struct {
+	communicator
+	ch chan *message
 }
-
-func (p player) IsConnected() bool {
-	return p.Conn != nil
-}
-
 type gameReadyCallabck func(*gameRoom)
-
 type gameRoom struct {
-	players [2]*player
+	Users   [2]user
 	Board   *chess.Board
 	OnReady gameReadyCallabck
 	Started bool
 }
 
-func (r *gameRoom) Join(p *player) error {
+func (r *gameRoom) Join(c *websocket.Conn) error {
 	var i int
-	if r.players[0] == nil {
+	if r.Users[0].conn == nil {
 		i = 0
-	} else if r.players[1] == nil {
+	} else if r.Users[1].conn == nil {
 		i = 1
 	} else {
 		return fmt.Errorf("room is full")
 	}
 
-	p.ch = make(chan *message)
-	r.players[i] = p
-
+	r.Users[i].conn = c
 	return nil
 }
-func (r *gameRoom) Leave(p *player) {
+func (r *gameRoom) Leave(c *websocket.Conn) {
 	var i int
-	if r.players[0] == p {
+	if r.Users[0].conn == c {
 		i = 0
-	} else if r.players[1] == p {
+	} else if r.Users[1].conn == c {
 		i = 1
 	} else {
 		return
 	}
 
-	close(r.players[i].ch)
-	r.players[i] = nil
+	r.Users[i].conn = nil
 }
+func (r *gameRoom) GetChannel(c *websocket.Conn) chan *message {
+	var i int
+	if r.Users[0].conn == c {
+		i = 0
+	} else if r.Users[1].conn == c {
+		i = 1
+	} else {
+		return nil
+	}
 
+	return r.Users[i].ch
+}
 func (r *gameRoom) Broadcast(cmd string, args ...string) {
-	for _, p := range r.players {
-		if p == nil {
-			continue
-		}
-		communicator{p.Conn}.send(cmd, args...)
+	for _, p := range r.Users {
+		p.send(cmd, args...)
 	}
 }
 
 func (r *gameRoom) IsEmpty() bool {
-	return r.players[0] == nil && r.players[1] == nil
+	return r.Users[0].conn == nil && r.Users[1].conn == nil
 }
 func (r *gameRoom) IsFull() bool {
-	return r.players[0] != nil && r.players[1] != nil
+	return r.Users[0].conn != nil && r.Users[1].conn != nil
 }
 
 type roomManager struct {
@@ -93,13 +92,13 @@ func (m *roomManager) get(code string) *gameRoom {
 func (m *roomManager) GenCode() string {
 	return fmt.Sprintf("%04d", len(m.rooms))
 }
-func (m *roomManager) AddPlayer(p *player, code string) error {
+func (m *roomManager) AddConn(c *websocket.Conn, code string) error {
 	room := m.get(code)
 	if room == nil {
 		return fmt.Errorf("room doesn't exist")
 	}
 
-	if err := room.Join(p); err != nil {
+	if err := room.Join(c); err != nil {
 		return err
 	}
 
@@ -110,17 +109,13 @@ func (m *roomManager) AddPlayer(p *player, code string) error {
 
 	return nil
 }
-func (m *roomManager) RemovePlayer(p *player, code string) error {
-	if p == nil {
-		return fmt.Errorf("player is nil")
-	}
-
+func (m *roomManager) RemoveConn(c *websocket.Conn, code string) error {
 	room := m.get(code)
 	if room == nil {
 		return fmt.Errorf("room doesn't exist")
 	}
 
-	room.Leave(p)
+	room.Leave(c)
 	if room.IsEmpty() {
 		m.RemoveRoom(code)
 	}
@@ -133,6 +128,10 @@ func (m *roomManager) CreateRoom(onReady gameReadyCallabck) (code string) {
 
 	code = m.GenCode()
 	m.rooms[code] = &gameRoom{
+		Users: [2]user{
+			{ch: make(chan *message)},
+			{ch: make(chan *message)},
+		},
 		OnReady: onReady,
 	}
 
@@ -142,5 +141,7 @@ func (m *roomManager) RemoveRoom(code string) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
+	close(m.rooms[code].Users[0].ch)
+	close(m.rooms[code].Users[1].ch)
 	delete(m.rooms, code)
 }

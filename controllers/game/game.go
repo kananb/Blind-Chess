@@ -23,12 +23,11 @@ func handleWebsocket(c *gin.Context) {
 		return
 	}
 	comm := communicator{conn}
-	p := &player{Conn: conn}
 	var code string
 
 	defer conn.Close()
 	defer func() {
-		manager.RemovePlayer(p, code)
+		manager.RemoveConn(conn, code)
 	}()
 
 awaitGame:
@@ -46,14 +45,14 @@ awaitGame:
 				comm.send("DENY", "no room code provided")
 				continue
 			}
-			if err = manager.AddPlayer(p, msg.Args[0]); err != nil {
+			if err = manager.AddConn(conn, msg.Args[0]); err != nil {
 				comm.send("DENY", err.Error())
 				continue
 			}
 			code = msg.Args[0]
 		} else if msg.Cmd == "CREATE" {
 			code = manager.CreateRoom(manageGame)
-			if err = manager.AddPlayer(p, code); err != nil {
+			if err = manager.AddConn(conn, code); err != nil {
 				manager.RemoveRoom(code)
 				comm.send("DENY", err.Error())
 				code = ""
@@ -76,8 +75,9 @@ awaitGame:
 	}
 
 	room := manager.get(code)
+	ch := room.GetChannel(conn)
 	if room.Started {
-		p.ch <- &message{Cmd: "UPDATE"}
+		ch <- &message{Cmd: "UPDATE"}
 	}
 
 	for {
@@ -88,7 +88,7 @@ awaitGame:
 		}
 
 		if room.Started {
-			p.ch <- msg
+			ch <- msg
 		} else if msg.Cmd != "QUIT" {
 			comm.send("ERROR", "game hasn't started yet")
 		}
@@ -97,7 +97,7 @@ awaitGame:
 		}
 	}
 
-	manager.RemovePlayer(p, code)
+	manager.RemoveConn(conn, code)
 	goto awaitGame
 }
 
