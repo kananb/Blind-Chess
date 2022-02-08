@@ -78,7 +78,7 @@ function Game(props) {
 	
 	const updateGame = (state) => {
 		game.Error = "";
-		if (game.SideToMove != state.SideToMove && game.SideToMove) {
+		if (game.SideToMove !== state.SideToMove && game.SideToMove) {
 			playSound();
 		}
 		setGame({...Object.assign(game, state)});

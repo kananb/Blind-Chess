@@ -54,7 +54,7 @@ awaitGame:
 			}
 			code = msg.Args[0]
 		} else if msg.Cmd == "CREATE" {
-			code = manager.CreateRoom(manageGame)
+			code = manager.CreateRoom(msg.Args[0], manageGame)
 			if err = manager.AddConn(conn, code); err != nil {
 				manager.RemoveRoom(code)
 				comm.send("DENY", err.Error())

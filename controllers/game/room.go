@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -12,10 +13,16 @@ type user struct {
 	communicator
 	ch chan *message
 }
+type gameConfig struct {
+	Duration  int
+	Increment int
+	PlayAs    string
+}
 type gameReadyCallabck func(*gameRoom)
 type gameRoom struct {
 	Users   [2]user
 	Board   *chess.Board
+	Config  gameConfig
 	OnReady gameReadyCallabck
 	Started bool
 }
@@ -122,7 +129,13 @@ func (m *roomManager) RemoveConn(c *websocket.Conn, code string) error {
 	return nil
 }
 
-func (m *roomManager) CreateRoom(onReady gameReadyCallabck) (code string) {
+func (m *roomManager) CreateRoom(cfg string, onReady gameReadyCallabck) (code string) {
+	var config gameConfig
+	err := json.Unmarshal([]byte(cfg), &config)
+	if err != nil {
+		config = gameConfig{}
+	}
+
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -132,6 +145,7 @@ func (m *roomManager) CreateRoom(onReady gameReadyCallabck) (code string) {
 			{ch: make(chan *message)},
 			{ch: make(chan *message)},
 		},
+		Config:  config,
 		OnReady: onReady,
 	}
 

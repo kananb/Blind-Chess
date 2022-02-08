@@ -1,16 +1,23 @@
 :root {
 	--primary: #46a8af; /* #6ab293 */
-	--dark: #424240;
+	--shadow: #255a6e;
+	--neutral: #424240;
+	--dark: #353431;
 	--darker: #2D2C2A;
 	--darkest: #252422;
 	--error: #ff4128;
+
+	--text: #ffffff;
+	--shade: #cecece;
 	
 	--board-light: #e8e8e8;
 	--board-dark: #5ea5aa;
+
+	font-size: 17px;
 }
 
 * {
-	color: white;
+	color: var(--text);
 	box-sizing: border-box;
 	margin: 0;
 }
@@ -42,13 +49,36 @@ input {
 
 	border: none;
 	border-radius: 5px;
-	background-color: #353431;
+	background-color: var(--dark);
 }
 input.error {
 	outline: 2px solid var(--error);
 }
 input.prompt {
 	outline: 2px solid var(--primary);
+}
+
+label {
+	text-align: left;
+	font-size: 17px;
+	font-weight: bold;
+	
+	width: 100%;
+	margin: 0.2em 0;
+
+	user-select: none;
+}
+
+select {
+	font-size: 17px;
+
+	width: 100%;
+	height: 30px;
+	padding: 0 0.7em;
+
+	border: none;
+	border-radius: 5px;
+	background-color: var(--dark);
 }
 
 button {
@@ -58,23 +88,29 @@ button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 30px;
+	height: 40px;
 	padding: 0.5em 0.7em;
 
 	outline: none;
 	border: none;
 	border-radius: 5px;
 
-	color: white;
+	box-shadow: -1.5px 1.5px 0px 1.5px var(--shadow);
+	color: var(--text);
 	background-color: #46a8af;
+
+	transition: all 0.075s ease-in-out;
 }
 button:hover {
 	cursor: pointer;
 	
-	color: var(--dark);
-	background-color: #fff;
-
-	transition: all 0.1s ease-in-out;
+	box-shadow: -2px 2px 0 2px var(--shade);
+	color: var(--neutral);
+	background-color: var(--text);
+}
+button:active {
+	box-shadow: none !important;
+	transform: translate(-2px, 2px);
 }
 
 .error {

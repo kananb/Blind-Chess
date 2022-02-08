@@ -69,12 +69,26 @@ func (t *turnTimer) update(state *gameState, color chess.SideColor) bool {
 
 func manageGame(room *gameRoom) {
 	room.Board = chess.StartingPosition()
-	state := gameState{WhiteClock: 69, BlackClock: 69}
+	if room.Config.Duration <= 0 {
+		room.Config.Duration = 59990 // 99m:99s as the timer
+	}
+	if room.Config.Increment < 0 {
+		room.Config.Increment = 0
+	}
+	state := gameState{WhiteClock: room.Config.Duration + 9, BlackClock: room.Config.Duration + 9}
 	colors := [2]chess.SideColor{}
 
-	rand.Seed(time.Now().UTC().UnixNano())
-	colors[0] = chess.SideColor(rand.Intn(2) + 1)
-	colors[1] = ^colors[0] & 3
+	if room.Config.PlayAs == "w" {
+		colors[0] = chess.White
+		colors[1] = chess.Black
+	} else if room.Config.PlayAs == "b" {
+		colors[0] = chess.Black
+		colors[1] = chess.White
+	} else {
+		rand.Seed(time.Now().UTC().UnixNano())
+		colors[0] = chess.SideColor(rand.Intn(2) + 1)
+		colors[1] = ^colors[0] & 3
+	}
 	room.Users[0].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[0].String()))
 	room.Users[1].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[1].String()))
 
@@ -143,6 +157,11 @@ gameLoop:
 
 					break
 				}
+			}
+			if room.Board.SideToMove == chess.White {
+				state.BlackClock += room.Config.Increment
+			} else {
+				state.WhiteClock += room.Config.Increment
 			}
 			state.current = false
 		}
