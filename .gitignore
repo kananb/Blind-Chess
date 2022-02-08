@@ -22,3 +22,4 @@ frontend/blind-chess/yarn-error.log*
 
 *.exe
 .env
+*.bat
