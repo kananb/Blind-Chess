@@ -16,7 +16,6 @@ function Menu(props) {
 			if (msg.cmd === "DENY") {
 				setError(msg.args[0]);
 			} else if (msg.cmd === "CODE") {
-				conn.send("OK");
 				onJoin(msg.args[0]);
 			} else {
 				console.error(msg);
@@ -25,17 +24,22 @@ function Menu(props) {
 	}
 
 	const handleJoin = e => {
-		try {
+		e.preventDefault();
+		if (!conn) {
+			setError("connection failed, retry in a few seconds");
+		} else {
 			conn.send(`JOIN_${code.current.value}`);
-		} catch (err) {
-			console.error(err);
 		}
 
 		code.current.select();
-		e.preventDefault();
 	};
 	const handleCreate = e => {
 		e.preventDefault();
+		if (!conn) {
+			setError("connection failed, retry in a few seconds");
+		} else {
+			conn.send(`JOIN_${code.current.value}`);
+		}
 
 		let config;
 		if (isNaN(duration.current.value)) {

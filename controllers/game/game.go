@@ -62,20 +62,7 @@ awaitGame:
 			}
 		}
 	}
-
-	// wait for game room code acknowledgement
-	for {
-		comm.send("CODE", code)
-		msg, err := comm.receive()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		if msg.Cmd == "OK" {
-			break
-		}
-	}
+	comm.send("CODE", code)
 
 	room := manager.get(code)
 	ch := room.GetChannel(conn)
@@ -97,6 +84,8 @@ awaitGame:
 		}
 		if msg.Cmd == "QUIT" {
 			break
+		} else if msg.Cmd == "JOIN" || msg.Cmd == "CREATE" {
+			comm.send("CODE", code)
 		}
 	}
 

@@ -11,24 +11,27 @@ function Home(props) {
 	useEffect(() => {
 		(function connect() {
 			let socket = new WebSocket(`ws${(window.location.protocol === "https:") ? "s" : ""}://${window.location.host}/game`);
-			let connectInterval;
+			let connectTimeout;
 	
 			socket.onopen = () => {
 				console.log("Socket connection established.");
 				timeout.current = 250;
-				clearTimeout(connectInterval);
+				clearTimeout(connectTimeout);
+
+				if (code) socket.send(`JOIN_${code}`);
 				setConn(socket);
 			};
 	
 			socket.onclose = () => {
+				console.log("Socket closed, retrying connection.");
 				timeout.current += timeout.current;
-				connectInterval = setTimeout(() => {
+				connectTimeout = setTimeout(() => {
 					if (!conn || conn.readyState === WebSocket.CLOSED) connect();
 				}, Math.min(timeout.current, 10000));
 			};
 	
 			socket.onerror = () => {
-				console.error("Socket encountered an error, retrying connection.");
+				console.error("Socket encountered an error, closing connection.");
 				socket.close();
 			};
 		})();
