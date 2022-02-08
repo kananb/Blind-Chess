@@ -33,23 +33,43 @@ func (g *gameState) String() string {
 	return g.latest
 }
 
-func awaitMessage(room *gameRoom) (msg *message, from int) {
-	select {
-	case msg = <-room.Users[0].ch:
-		from = 0
-	case msg = <-room.Users[1].ch:
-		from = 1
+type turnTimer struct {
+	Color      chess.SideColor
+	start, end int64
+}
+
+func (t *turnTimer) update(state *gameState, color chess.SideColor) bool {
+	t.end = time.Now().UnixMilli()
+	elapsed := int(t.end-t.start) / 100 // elapsed time in deciseconds
+	t.start = t.end
+
+	if t.Color == chess.White {
+		state.WhiteClock -= elapsed
+		if state.WhiteClock <= 0 {
+			state.WhiteClock = 0
+			state.Loser = chess.White.String()
+			state.gameOver = true
+			state.current = false
+			return false
+		}
+	} else {
+		state.BlackClock -= elapsed
+		if state.BlackClock <= 0 {
+			state.BlackClock = 0
+			state.Loser = chess.White.String()
+			state.gameOver = true
+			state.current = false
+			return false
+		}
 	}
 
-	if room.IsEmpty() {
-		return nil, 0
-	}
-	return
+	t.Color = color
+	return true
 }
 
 func manageGame(room *gameRoom) {
 	room.Board = chess.StartingPosition()
-	state := gameState{WhiteClock: 6000, BlackClock: 6000}
+	state := gameState{WhiteClock: 69, BlackClock: 69}
 	colors := [2]chess.SideColor{}
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -58,10 +78,7 @@ func manageGame(room *gameRoom) {
 	room.Users[0].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[0].String()))
 	room.Users[1].send("STATE", fmt.Sprintf(`{"Side":%q}`, colors[1].String()))
 
-	turn := struct {
-		Color      chess.SideColor
-		start, end int64
-	}{room.Board.SideToMove, time.Now().UnixMilli(), 0}
+	turn := turnTimer{room.Board.SideToMove, time.Now().UnixMilli(), 0}
 gameLoop:
 	for {
 		if !state.current {
@@ -74,17 +91,7 @@ gameLoop:
 				state.gameOver = true
 			}
 
-			turn.end = time.Now().UnixMilli()
-			elapsed := int(turn.end-turn.start) / 100 // turn time elapsed in deciseconds
-			turn.start = turn.end
-
-			if turn.Color == chess.White {
-				state.WhiteClock -= elapsed
-			} else {
-				state.BlackClock -= elapsed
-			}
-			turn.Color = room.Board.SideToMove
-
+			turn.update(&state, room.Board.SideToMove)
 			state.FEN = room.Board.String()
 			state.SideToMove = room.Board.SideToMove.String()
 			state.History = room.Board.History()
@@ -92,8 +99,21 @@ gameLoop:
 			go room.Broadcast("STATE", state.String())
 		}
 
-		msg, from := awaitMessage(room)
-		if msg == nil {
+		var msg *message
+		var from int
+		for msg == nil {
+			select {
+			case msg = <-room.Users[0].ch:
+				from = 0
+			case msg = <-room.Users[1].ch:
+				from = 1
+			case <-time.After(time.Second):
+				if ok := turn.update(&state, room.Board.SideToMove); !ok {
+					continue gameLoop
+				}
+			}
+		}
+		if room.IsEmpty() {
 			break
 		}
 

@@ -58,11 +58,11 @@ function Game(props) {
 		if (game.Loser || !game.FEN) return;
 
 		interval.current = setInterval((color) => {
-			if (color === "w") game.WhiteClock--;
-			else game.BlackClock--;
+			if (color === "w") game.WhiteClock -= 10;
+			else game.BlackClock -= 10;
 
 			updateClocks();
-		}, 95, game.SideToMove);
+		}, 1000, game.SideToMove);
 	}, [game]);
 	
 	const moveElements = [];
