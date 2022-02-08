@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import useSound from 'use-sound';
+import pieceSound from '../assets/piece_sound.mp3'; 
+
 function Move(props) {
 	const turn = props.turn || 1;
 	const white = props.white || "";
@@ -17,6 +20,7 @@ function Move(props) {
 }
 
 function Game(props) {
+	const [playSound] = useSound(pieceSound);
 	const {conn, code} = props;
 	const onLeave = props.onLeave || (() => {});
 	const [game, setGame] = useState({
@@ -74,6 +78,9 @@ function Game(props) {
 	
 	const updateGame = (state) => {
 		game.Error = "";
+		if (game.SideToMove != state.SideToMove && game.SideToMove) {
+			playSound();
+		}
 		setGame({...Object.assign(game, state)});
 	};
 	if (conn) {
