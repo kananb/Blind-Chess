@@ -84,7 +84,7 @@ function Menu(props) {
 					<button className="create">Create a game</button>
 					<label>Time control</label>
 					<div className="timeControl">
-						<input ref={duration} onChange={handleTimeChange} type="text" placeholder="min" />
+						<input ref={duration} onChange={handleTimeChange} type="text" placeholder="duration" />
 						<input ref={increment} onChange={handleTimeChange} type="text" placeholder="increment" />
 					</div>
 					<label>Play as</label>
@@ -98,7 +98,7 @@ function Menu(props) {
 
 			<div className="info">
 				<a href="https://www.chess.com/terms/chess-notation" target="_blank" rel="noopener noreferrer">Learn more about chess notation</a>
-				<a href="http://" target="_blank" rel="noopener noreferrer">Found a problem?</a>
+				<a href="mailto:kananbboubion@gmail.com" target="_blank" rel="noopener noreferrer">Found a problem?</a>
 			</div>
 		</div>
 	);
