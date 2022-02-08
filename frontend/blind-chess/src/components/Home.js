@@ -8,7 +8,7 @@ function Home(props) {
 	const [code, setCode] = useState(undefined);
 
 	useEffect(() => {
-		let socket = new WebSocket(`ws://${window.location.host}/game`);
+		let socket = new WebSocket(`ws${(window.location.protocol === "https:") ? "s" : ""}://${window.location.host}/game`);
 
 		socket.onopen = () => {
 			console.log("Opened websocket connection");
