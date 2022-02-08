@@ -113,6 +113,19 @@ button:active {
 	transform: translate(-2px, 2px);
 }
 
+a {
+	text-decoration: underline;
+	font-size: 15px;
+	overflow-wrap: anywhere;
+
+	margin-top: 0.5em;
+
+	color: #c4c4c4;
+}
+a:hover {
+	cursor: pointer;
+}
+
 .error {
 	font-size: 16px;
 	

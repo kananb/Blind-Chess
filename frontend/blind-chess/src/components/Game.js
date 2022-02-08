@@ -109,10 +109,26 @@ function Game(props) {
 
 		e.target.value = "";
 	};
+	const copyPGN = () => {
+		const parts = [];
+		let turn = 1;
+		for (let i = 0; i < game.History.length; i += 2, turn++) {
+			parts.push(`${turn}. ${game.History[i]}${(i + 1 < game.History.length) ? " " + game.History[i+1] : ""}`);
+		}
+
+		navigator.clipboard.writeText(parts.join(" "));
+	};
 
 	let info = undefined;
 	if (game.FEN) {
-		info = <a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>;
+		info = (
+			<div className="positionInfo">
+				<a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>
+				 &nbsp;&nbsp;--&nbsp;&nbsp;
+				<a className="pgn" onClick={copyPGN} alt="Copy PGN data">PGN
+				<span className="tooltip">Copy PGN to clipboard</span>
+				</a>
+			</div>);
 	} else {
 		info = <span className="code">room code: { code }</span>;
 	}
@@ -155,9 +171,13 @@ function Game(props) {
 			<div className="controls">
 				<input ref={inputRef} className={prompt ? "prompt" : ""} type="text" onKeyPress={enterMove} placeholder={placeholder} disabled={!prompt} />
 				<button className="leave" onClick={() => {
-					if (conn) conn.send("QUIT");
-					onLeave();
-				}}>Leave</button>
+					if (!game.FEN || game.Loser || !conn || conn.readyState !== WebSocket.OPEN) {
+						if (conn) conn.send("QUIT");
+						onLeave();
+					} else {
+						if (conn) conn.send("RESIGN");
+					}
+				}}>{(!game.FEN || game.Loser || !conn || conn.readyState !== WebSocket.OPEN) ? "Leave" : "Resign"}</button>
 			</div>
 			{ info }
 		</div>

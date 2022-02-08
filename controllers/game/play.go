@@ -131,7 +131,7 @@ gameLoop:
 			break
 		}
 
-		if msg.Cmd == "QUIT" {
+		if msg.Cmd == "QUIT" || msg.Cmd == "RESIGN" {
 			if !state.gameOver {
 				state.gameOver = true
 				state.Loser = colors[from].String()

@@ -126,15 +126,40 @@
 	background-color: var(--neutral);
 }
 
-.fen {
+.positionInfo {
 	text-align: center;
-	font-size: 15px;
-	overflow-wrap: anywhere;
+}
+.tooltip {
+	text-align: center;
+	font-weight: bold;
 
+	visibility: hidden;
+	position: absolute;
+	z-index: 1;
+
+	width: 15em;
+	bottom: 105%;
+	left: 50%;
+	margin-left: -7.5em;
+
+	border-radius: 5px;
+	padding: 0.5em 0.2em;
+	
+	background-color: var(--neutral);
+}
+.fen {
+	position: relative;
 	width: 85%;
-	margin-top: 0.5em;
-
-	color: #c4c4c4;
+}
+.fen:hover .tooltip {
+	visibility: visible;
+}
+.pgn {
+	position: relative;
+	display: inline-block;
+}
+.pgn:hover .tooltip {
+	visibility: visible;
 }
 
 .code {
