@@ -10,11 +10,11 @@ RUN go mod download
 
 # copy and build go source code
 COPY *.go ./
-COPY controllers ./controllers
+COPY game ./game
 RUN go build -o blind-chess
 
 # copy react build
-COPY frontend/blind-chess/build ./frontend/blind-chess/build
+COPY client/build ./client/build
 
 ENV PORT 80
 EXPOSE 80

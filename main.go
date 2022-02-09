@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/kananb/blind-chess/controllers/game"
+	"github.com/kananb/blind-chess/game"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	//os.Setenv("PORT", "80")
 
 	router := gin.Default()
-	staticPath := "./frontend/blind-chess/build/"
+	staticPath := "./client/build/"
 
 	router.Use(static.Serve("/", static.LocalFile(staticPath, true)))
 

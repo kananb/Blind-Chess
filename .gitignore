@@ -1,24 +1,24 @@
 # dependencies
-frontend/blind-chess/node_modules
-frontend/blind-chess/.pnp
-frontend/blind-chess/.pnp.js
+client/node_modules
+client/.pnp
+client/.pnp.js
 
 # testing
-frontend/blind-chess/coverage
+client/coverage
 
 # production
-frontend/blind-chess/build
+client/build
 
 # misc
-frontend/blind-chess/.DS_Store
-frontend/blind-chess/.env.local
-frontend/blind-chess/.env.development.local
-frontend/blind-chess/.env.test.local
-frontend/blind-chess/.env.production.local
+client/.DS_Store
+client/.env.local
+client/.env.development.local
+client/.env.test.local
+client/.env.production.local
 
-frontend/blind-chess/npm-debug.log*
-frontend/blind-chess/yarn-debug.log*
-frontend/blind-chess/yarn-error.log*
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
 
 *.exe
 .env

@@ -3,7 +3,7 @@ version: "3.9"
 services:
   web:
     build: .
-    container_name: web-server
+    container_name: blind-chess
     ports:
       - ${PORT}:${PORT}
     environment:
