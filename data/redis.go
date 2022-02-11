@@ -16,11 +16,13 @@ var ctx context.Context
 var client *redis.Client
 
 func init() {
+	return
 	host, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PASS")
 	client = redis.NewClient(&redis.Options{
 		Addr:     host,
 		Password: pass,
 	})
+	fmt.Println(client)
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
 		log.Fatal("failed to connect to redis server", err)

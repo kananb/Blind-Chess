@@ -24,14 +24,13 @@ function Game(props) {
 	const {conn, code} = props;
 	const onLeave = props.onLeave || (() => {});
 	const [game, setGame] = useState({
-		History: [""],
-		Error: "",
-		Side: "",
-		SideToMove: "",
-		FEN: "",
-		Loser: "",
+		Color: 0,
 		WhiteClock: 0,
 		BlackClock: 0,
+		FEN: "",
+		SideToMove: 0,
+		History: [""],
+		Result: "",
 	});
 	const interval = useRef(0);
 	const whiteTime = useRef(undefined);
@@ -59,7 +58,7 @@ function Game(props) {
 		updateClocks();
 
 		clearInterval(interval.current);
-		if (game.Loser || !game.FEN) return;
+		if (game.Result || !game.FEN) return;
 
 		interval.current = setInterval((color) => {
 			if (color === "w") game.WhiteClock -= 10;
@@ -134,19 +133,25 @@ function Game(props) {
 	}
 
 	let placeholder, prompt = false;
-	if (game.Loser) placeholder = "Game over";
+	if (game.Result) placeholder = "Game over";
 	else if (!game.FEN) placeholder = "Waiting for game to start";
-	else if (game.Side === game.SideToMove) {
+	else if (game.Color === game.SideToMove) {
 		placeholder = "Type your move";
 		prompt = true;
 	} else placeholder = "Waiting for opponent";
 
 	let notification = undefined;
-	if (game.Loser) {
+	if (game.Result) {
+		let message = "You lost :(";
+		if (game.Result == "1/2-1/2") {
+			message = "It's a draw";
+		} else if ((game.Result === "1-0" && game.Color === 1) || (game.Result == "0-1" && game.Color === 2)) {
+			message = "You won!";
+		}
 		notification = (
 			<div className="notification">
 				<h3>Game Over</h3>
-				{ (game.Loser === game.Side) ? "You lost :(" : (game.Loser === "-") ? "It's a draw" : "You won!" }
+				{ message }
 			</div>
 		);
 	}
@@ -171,13 +176,13 @@ function Game(props) {
 			<div className="controls">
 				<input ref={inputRef} className={prompt ? "prompt" : ""} type="text" onKeyPress={enterMove} placeholder={placeholder} disabled={!prompt} />
 				<button className="leave" onClick={() => {
-					if (!game.FEN || game.Loser || !conn || conn.readyState !== WebSocket.OPEN) {
+					if (!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) {
 						if (conn) conn.send("QUIT");
 						onLeave();
 					} else {
 						if (conn) conn.send("RESIGN");
 					}
-				}}>{(!game.FEN || game.Loser || !conn || conn.readyState !== WebSocket.OPEN) ? "Leave" : "Resign"}</button>
+				}}>{(!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) ? "Leave" : "Resign"}</button>
 			</div>
 			{ info }
 		</div>

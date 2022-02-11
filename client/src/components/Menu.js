@@ -15,8 +15,9 @@ function Menu(props) {
 
 			if (msg.cmd === "DENY") {
 				setError(msg.args[0]);
-			} else if (msg.cmd === "CODE") {
-				onJoin(msg.args[0]);
+			} else if (msg.cmd === "IN") {
+				conn.send("UPDATE");
+				onJoin(msg.args[0], msg.args[1]);
 			} else {
 				console.error(msg);
 			}
@@ -28,7 +29,7 @@ function Menu(props) {
 		if (!conn) {
 			setError("connection failed, retry in a few seconds");
 		} else {
-			conn.send(`JOIN_${code.current.value}`);
+			conn.send(`JOIN_${code.current.value.toUpperCase()}`);
 		}
 
 		code.current.select();
@@ -37,8 +38,6 @@ function Menu(props) {
 		e.preventDefault();
 		if (!conn) {
 			setError("connection failed, retry in a few seconds");
-		} else {
-			conn.send(`JOIN_${code.current.value}`);
 		}
 
 		let config;
@@ -55,7 +54,7 @@ function Menu(props) {
 		config = {
 			"Duration": parseInt(duration.current.value || "0")*600,
 			"Increment": parseInt(increment.current.value || "0")*10,
-			"PlayAs": playAs.current.value,
+			"PlayAs": parseInt(playAs.current.value || "0"),
 		};
 		try {
 			conn.send(`CREATE_${JSON.stringify(config)}`);
@@ -94,8 +93,8 @@ function Menu(props) {
 					<label>Play as</label>
 					<select ref={playAs} name="selectSide" id="selectSide">
 						<option value="">Random</option>
-						<option value="w">White</option>
-						<option value="b">Black</option>
+						<option value="1">White</option>
+						<option value="2">Black</option>
 					</select>
 				</form>
 			</div>

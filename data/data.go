@@ -23,6 +23,7 @@ type Player struct {
 type GameState struct {
 	Players        [2]Player
 	FEN            string
+	SideToMove     chess.SideColor
 	History        []string
 	TimeOfLastMove int64
 	Increment      int
@@ -33,8 +34,16 @@ type userGameData struct {
 	WhiteClock int
 	BlackClock int
 	FEN        string
+	SideToMove chess.SideColor
 	History    []string
 	Result     string
+}
+
+func NewGameState() *GameState {
+	return &GameState{
+		SideToMove: chess.White,
+		History:    []string{},
+	}
 }
 
 func (s *GameState) Marshal(playerID string) string {
@@ -47,6 +56,7 @@ func (s *GameState) Marshal(playerID string) string {
 		WhiteClock: s.Players[0].Clock,
 		BlackClock: s.Players[1].Clock,
 		FEN:        s.FEN,
+		SideToMove: s.SideToMove,
 		History:    s.History,
 		Result:     s.Result,
 	}
@@ -148,16 +158,19 @@ func (m ChessManager) Create(config GameConfig) (code, id string, in chan string
 	}
 	state.Increment = config.Increment
 
+	i := 0
 	if config.PlayAs == chess.White {
 		state.Players[0].ID = fmt.Sprintf("%08X", rand.Int31())
 	} else if config.PlayAs == chess.Black {
 		state.Players[1].ID = fmt.Sprintf("%08X", rand.Int31())
+		i = 1
 	} else {
-		state.Players[rand.Intn(2)].ID = fmt.Sprintf("%08X", rand.Int31())
+		i = rand.Intn(2)
+		state.Players[i].ID = fmt.Sprintf("%08X", rand.Int31())
 	}
 	m.manager.Set(code, state)
 
-	return code, state.Players[0].ID, m.manager.Sub(code)
+	return code, state.Players[i].ID, m.manager.Sub(code)
 }
 func (m ChessManager) Leave(code string, in chan string) {
 	m.manager.Unsub(code, in)

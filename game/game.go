@@ -36,24 +36,36 @@ func handleWebsocket(c *gin.Context) {
 	comm := communicator{conn}
 	var code, id string
 	var in chan string
-
 	defer func() {
 		manager.Leave(code, in)
 		conn.Close()
+	}()
+
+	msgs, msg, ok := make(chan *message), (*message)(nil), false
+	go func() {
+		for {
+			msg, err := comm.receive()
+			if err != nil {
+				fmt.Println(err)
+				close(msgs)
+				return
+			}
+
+			msgs <- msg
+		}
 	}()
 
 awaitGame:
 	// wait for connection to join or create a game room
 	code = ""
 	for code == "" {
-		msg, err := comm.receive()
-		if err != nil {
-			fmt.Println(err)
+		if msg, ok = <-msgs; !ok {
 			return
 		}
 
 		id = ""
 		if msg.Cmd == "JOIN" {
+			fmt.Println(msg)
 			if msg.Args[0] == "" {
 				comm.send("DENY", "no room code provided")
 				continue
@@ -68,7 +80,12 @@ awaitGame:
 			}
 			code = msg.Args[0]
 		} else if msg.Cmd == "CREATE" {
-			code, id, in = manager.Create(*data.NewGameConfig(msg.Args[0]))
+			config := data.NewGameConfig(msg.Args[0])
+			if config == nil {
+				comm.send("DENY", "invalid game configuration")
+				continue
+			}
+			code, id, in = manager.Create(*config)
 			if in == nil {
 				comm.send("DENY", "something went wrong")
 			}
@@ -79,19 +96,10 @@ awaitGame:
 	if state.Players[1].ID == id {
 		side = chess.Black
 	}
-	board, _ := chess.NewBoard(state.FEN)
-
-	msgs, msg, ok := make(chan *message), (*message)(nil), false
-	go func() {
-		msg, err := comm.receive()
-		if err != nil {
-			fmt.Println(err)
-			close(msgs)
-			return
-		}
-
-		msgs <- msg
-	}()
+	var board *chess.Board = nil
+	if state.FEN != "" {
+		board, _ = chess.NewBoard(state.FEN)
+	}
 
 	updateTime := func() {
 		diff := int(time.Now().UnixMilli()-state.TimeOfLastMove) / 100
@@ -137,12 +145,12 @@ gameLoop:
 		}
 
 		if msg.Cmd == "QUIT" {
-			if state.Result != "" {
-				break
+			if board != nil && state.Result == "" {
+				updateTime()
+				updateResult(false)
+				manager.Notify(state, code, in)
 			}
-			updateTime()
-			updateResult(false)
-			notify()
+			break
 		} else if msg.Cmd == "UPDATE" {
 			if board != nil {
 				updateTime()
@@ -157,12 +165,13 @@ gameLoop:
 			comm.send("ERROR", "game hasn't started yet")
 			continue
 		} else if msg.Cmd == "RESIGN" {
-			if state.Result != "" {
-				continue
+			if board != nil && state.Result == "" {
+				updateTime()
+				updateResult(false)
+				notify()
+			} else {
+				comm.send("STATE", state.Marshal(id))
 			}
-			updateTime()
-			updateResult(false)
-			notify()
 		} else if msg.Cmd == "MOVE" {
 			if side != board.SideToMove {
 				comm.send("ERROR", "not your turn")
@@ -200,6 +209,8 @@ gameLoop:
 			} else if board.InStalemate() {
 				state.Result = "1/2-1/2"
 			}
+			state.FEN = board.String()
+			state.SideToMove = board.SideToMove
 			state.History = append(state.History, actual.String())
 
 			updateTime()
