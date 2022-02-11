@@ -38,7 +38,6 @@ function Home(props) {
 	}, []);
 
 	const handleJoin = (code, id) => {
-		console.log(id);
 		setInfo({
 			code: code,
 			id: id,

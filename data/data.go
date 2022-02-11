@@ -170,7 +170,7 @@ func (m ChessManager) Create(config GameConfig) (code, id string, in chan string
 	}
 	m.manager.Set(code, state)
 
-	return code, state.Players[i].ID, m.manager.Sub(code)
+	return code, state.Players[i].ID, in
 }
 func (m ChessManager) Leave(code string, in chan string) {
 	m.manager.Unsub(code, in)

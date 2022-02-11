@@ -59,7 +59,7 @@ func (r *MemoryStateManager) Sub(channel string) chan string {
 	r.subLock.Lock()
 	defer r.subLock.Unlock()
 
-	ch := make(chan string, 10)
+	ch := make(chan string)
 	if r.subs[channel] == nil {
 		r.subs[channel] = map[chan string]bool{}
 		r.Set(channel, NewGameState())
