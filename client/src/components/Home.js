@@ -30,7 +30,7 @@ function Home(props) {
 				timeout.current += timeout.current;
 				connectTimeout = setTimeout(() => {
 					if (!conn || conn.readyState === WebSocket.CLOSED) connect();
-				}, Math.min(timeout.current, 10000));
+				}, Math.min(timeout.current, 2000));
 			};
 	
 			socket.onerror = () => {

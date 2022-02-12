@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -17,7 +18,7 @@ var client *redis.Client
 
 func init() {
 	ctx = context.Background()
-	host, port, pass := "localhost", "6379", "" // os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
+	host, port, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
 	client = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%v:%v", host, port),
 		Password: pass,
