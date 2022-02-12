@@ -14,7 +14,11 @@
 
 .Chessboard .controls {
 	position: absolute;
+	width: 100%;
 	padding-top: 100%;
+
+	display: flex;
+	justify-content: center;
 }
 .flip {
 	margin-top: 0.5em;

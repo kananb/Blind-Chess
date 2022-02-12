@@ -112,6 +112,23 @@ button:active {
 	box-shadow: none !important;
 	transform: translate(-2px, 2px);
 }
+button.minimal {
+	font-weight: 500;
+	font-size: 16px;
+
+	height: auto;
+	padding: 0;
+
+	box-shadow: none;
+	color: var(--shade);
+	background-color: transparent;
+}
+button.minimal:hover {
+	text-decoration: underline;
+}
+button.minimal:active {
+	transform: none;
+}
 
 a {
 	text-decoration: underline;

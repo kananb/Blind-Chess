@@ -61,8 +61,11 @@ function Game(props) {
 		if (game.Result || !game.FEN) return;
 
 		interval.current = setInterval((color) => {
-			if (color === "w") game.WhiteClock -= 10;
-			else game.BlackClock -= 10;
+			if (color === 1) game.WhiteClock = Math.max(game.WhiteClock - 10, 0);
+			else game.BlackClock = Math.max(game.BlackClock - 10, 0);
+			if (game.WhiteClock <= 0 || game.BlackClock <= 0) {
+				if (conn) conn.send("UPDATE");
+			}
 
 			updateClocks();
 		}, 1000, game.SideToMove);
@@ -98,13 +101,13 @@ function Game(props) {
 		};
 	}
 	const enterMove = e => {
-		if (e.charCode !== 13) return;
-		const san = e.target.value;
+		e.preventDefault();
+		const san = inputRef.current.value;
 		
-		if (!conn || conn.readyState !== WebSocket.OPEN) return;
+		if (!san || !conn || conn.readyState !== WebSocket.OPEN) return;
 		conn.send(`MOVE_${san}`);
 
-		e.target.value = "";
+		inputRef.current.value = "";
 	};
 	const copyPGN = () => {
 		const parts = [];
@@ -122,9 +125,9 @@ function Game(props) {
 			<div className="positionInfo">
 				<a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>
 				 &nbsp;&nbsp;--&nbsp;&nbsp;
-				<a className="pgn" onClick={copyPGN} alt="Copy PGN data">PGN
+				<button className="minimal pgn" onClick={copyPGN} alt="Copy PGN data">PGN
 				<span className="tooltip">Copy PGN to clipboard</span>
-				</a>
+				</button>
 			</div>);
 	} else {
 		info = <span className="code">room code: { code }</span>;
@@ -141,9 +144,9 @@ function Game(props) {
 	let notification = undefined;
 	if (game.Result) {
 		let message = "You lost :(";
-		if (game.Result == "1/2-1/2") {
+		if (game.Result === "1/2-1/2") {
 			message = "It's a draw";
-		} else if ((game.Result === "1-0" && game.Color === 1) || (game.Result == "0-1" && game.Color === 2)) {
+		} else if ((game.Result === "1-0" && game.Color === 1) || (game.Result === "0-1" && game.Color === 2)) {
 			message = "You won!";
 		}
 		notification = (
@@ -158,10 +161,10 @@ function Game(props) {
 		<div className="Game">
 			{ notification }
 			<div className="clocks">
-				<div className={"timer " + ((game.SideToMove === "w") ? "active" : "")}>
+				<div className={"timer " + ((game.SideToMove === 1) ? "active" : "")}>
 					<span ref={whiteTime} className="time"></span>
 				</div>
-				<div className={"timer " + ((game.SideToMove === "b") ? "active" : "")}>
+				<div className={"timer " + ((game.SideToMove === 2) ? "active" : "")}>
 					<span ref={blackTime} className="time"></span>
 				</div>
 			</div>
@@ -172,15 +175,21 @@ function Game(props) {
 				{ game.Error }
 			</div>
 			<div className="controls">
-				<input ref={inputRef} className={prompt ? "prompt" : ""} type="text" onKeyPress={enterMove} placeholder={placeholder} disabled={!prompt} />
-				<button className="leave" onClick={() => {
-					if (!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) {
-						if (conn) conn.send("QUIT");
-						onLeave();
-					} else {
-						if (conn) conn.send("RESIGN");
-					}
-				}}>{(!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) ? "Leave" : "Resign"}</button>
+				<div className="buttons">
+					<button className="minimal leave" onClick={() => {
+						if (!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) {
+							if (conn) conn.send("QUIT");
+							onLeave();
+						} else {
+							if (conn) conn.send("RESIGN");
+						}
+					}}>{(!game.FEN || game.Result || !conn || conn.readyState !== WebSocket.OPEN) ? "leave" : "resign"}</button>
+					<button className="minimal">draw</button>
+				</div>
+				<form className="moveForm" onSubmit={enterMove}>
+					<input ref={inputRef} className={prompt ? "prompt" : ""} type="text" placeholder={placeholder} disabled={!prompt} />
+					<button className="enterMove" formAction="submit">Enter</button>
+				</form>
 			</div>
 			{ info }
 		</div>
