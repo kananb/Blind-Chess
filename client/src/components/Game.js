@@ -90,9 +90,7 @@ function Game(props) {
 				args: split.slice(1),
 			};
 
-			if (msg.cmd === "END") {
-
-			} else if (msg.cmd === "ERROR") {
+			if (msg.cmd === "ERROR") {
 				updateGame({Error: msg.args[0]});
 			} else if (msg.cmd === "STATE") {
 				updateGame(JSON.parse(msg.args[0]));

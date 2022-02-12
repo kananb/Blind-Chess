@@ -5,7 +5,8 @@ import Chessboard from './Chessboard';
 
 function Home(props) {
 	const [conn, setConn] = useState(null);
-	const [info, setInfo] = useState({});
+	const [joined, setJoined] = useState(false);
+	const info = useRef({});
 	const timeout = useRef(250);
 
 	useEffect(() => {
@@ -18,7 +19,9 @@ function Home(props) {
 				timeout.current = 250;
 				clearTimeout(connectTimeout);
 
-				if (info.code) socket.send(`JOIN_${info.code}_${info.id}`);
+				if (info.current.code) {
+					socket.send(`JOIN_${info.current.code}_${info.current.id}`);
+				}
 				setConn(socket);
 			};
 	
@@ -38,18 +41,20 @@ function Home(props) {
 	}, []);
 
 	const handleJoin = (code, id) => {
-		setInfo({
+		info.current = {
 			code: code,
 			id: id,
-		});
+		};
+		setJoined(true);
 	};
 	const handleLeave = () => {
-		setInfo({});
+		info.current = {};
+		setJoined(false);
 	};
 
 	let interact = undefined;
-	if (info.code) {
-		interact = <Game conn={conn} code={info.code} onLeave={handleLeave} />;
+	if (joined) {
+		interact = <Game conn={conn} code={info.current.code} onLeave={handleLeave} />;
 	} else {
 		interact = <Menu conn={conn} onJoin={handleJoin} />;
 	}

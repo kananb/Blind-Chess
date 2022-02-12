@@ -53,7 +53,7 @@ func (r *RedisStateManager) genKey() string {
 		num = rand.Intn(1 << (4 * 5)) // 2^(4bits*#digits)
 		key = fmt.Sprintf("%05X", num)
 
-		if _, ok := r.remoteSubs[key]; !ok {
+		if r.Get(key) == nil {
 			return key
 		}
 	}
@@ -90,7 +90,9 @@ func (r *RedisStateManager) Sub(channel string) chan string {
 	if r.remoteSubs[channel] == nil {
 		r.remoteSubs[channel] = client.Subscribe(ctx, channel)
 		r.localSubs[channel] = map[chan string]bool{}
-		r.Set(channel, NewGameState())
+		if r.Get(channel) == nil {
+			r.Set(channel, NewGameState())
+		}
 
 		go func() {
 			for msg := range r.remoteSubs[channel].Channel() {
@@ -120,7 +122,6 @@ func (r *RedisStateManager) Unsub(channel string, in chan string) {
 	if len(r.localSubs[channel]) == 0 {
 		if r.remoteSubs[channel] != nil {
 			r.remoteSubs[channel].Close()
-			r.Del(channel)
 		}
 		delete(r.localSubs, channel)
 		delete(r.remoteSubs, channel)

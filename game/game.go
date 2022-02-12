@@ -65,6 +65,7 @@ awaitGame:
 
 		id = ""
 		if msg.Cmd == "JOIN" {
+			fmt.Println(msg)
 			if msg.Args[0] == "" {
 				comm.send("DENY", "no room code provided")
 				continue
