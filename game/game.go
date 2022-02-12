@@ -22,7 +22,7 @@ var upgrader = websocket.Upgrader{
 var manager data.ChessManager
 
 func init() {
-	manager = data.NewChessManager(data.NewMemoryStateManager())
+	manager = data.NewChessManager(data.NewRedisStateManager())
 }
 
 func handleWebsocket(c *gin.Context) {

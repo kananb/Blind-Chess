@@ -68,7 +68,7 @@ func (r *MemoryStateManager) Sub(channel string) chan string {
 
 	return ch
 }
-func (r *MemoryStateManager) Unsub(channel string, in chan string) bool {
+func (r *MemoryStateManager) Unsub(channel string, in chan string) {
 	r.subLock.Lock()
 	defer r.subLock.Unlock()
 
@@ -87,8 +87,6 @@ func (r *MemoryStateManager) Unsub(channel string, in chan string) bool {
 		r.Del(channel)
 		delete(r.subs, channel)
 	}
-
-	return true
 }
 func (r *MemoryStateManager) Pub(msg, channel string, in chan string) bool {
 	r.subLock.RLock()

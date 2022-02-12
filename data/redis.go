@@ -16,13 +16,13 @@ var ctx context.Context
 var client *redis.Client
 
 func init() {
-	return
-	host, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PASS")
+	ctx = context.Background()
+	host, port, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
 	client = redis.NewClient(&redis.Options{
-		Addr:     host,
+		Addr:     fmt.Sprintf("%v:%v", host, port),
 		Password: pass,
 	})
-	fmt.Println(client)
+	log.Println(client)
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
 		log.Fatal("failed to connect to redis server", err)
@@ -30,26 +30,31 @@ func init() {
 }
 
 type RedisStateManager struct {
-	subs map[string]*redis.PubSub
-	lock sync.RWMutex
+	remoteSubs map[string]*redis.PubSub
+	localSubs  map[string]map[chan string]bool
+	lock       sync.RWMutex
 }
 
 func NewRedisStateManager() *RedisStateManager {
-	return &RedisStateManager{subs: map[string]*redis.PubSub{}}
+	return &RedisStateManager{
+		remoteSubs: map[string]*redis.PubSub{},
+		localSubs:  map[string]map[chan string]bool{},
+	}
 }
 
-func (r *RedisStateManager) GenKey() string {
+func (r *RedisStateManager) genKey() string {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
 	var num int
 	var key string
 	for {
-		num = rand.Intn(1048576)
+		num = rand.Intn(1 << 4 * 5) // 2^(4bits*#digits)
 		key = fmt.Sprintf("%05X", num)
 
-		r.lock.RLock()
-		if _, ok := r.subs[key]; !ok {
+		if _, ok := r.remoteSubs[key]; !ok {
 			return key
 		}
-		r.lock.RUnlock()
 	}
 }
 func (r *RedisStateManager) Get(key string) *GameState {
@@ -67,51 +72,70 @@ func (r *RedisStateManager) Get(key string) *GameState {
 	return state
 }
 func (r *RedisStateManager) Set(key string, state *GameState) bool {
-	val, err := json.Marshal(state)
-	if err != nil {
-		return false
-	}
-
-	_, err = client.Set(ctx, key, string(val), 1200).Result()
+	val := state.String()
+	_, err := client.Set(ctx, key, string(val), 1200).Result()
 	return err == nil
 }
 func (r *RedisStateManager) Del(key string) bool {
-	return true
+	_, err := client.Del(ctx, key).Result()
+	return err == nil
 }
 
-func (r *RedisStateManager) Sub(channel string) <-chan string {
+func (r *RedisStateManager) Sub(channel string) chan string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-
-	sub, ok := r.subs[channel]
-	if !ok {
-		sub = client.Subscribe(ctx, channel)
-		r.subs[channel] = sub
-	}
 
 	ch := make(chan string)
-	go func() {
-		for msg := range sub.Channel() {
-			ch <- msg.Payload
-		}
-		close(ch)
-	}()
+	if r.remoteSubs[channel] == nil {
+		r.remoteSubs[channel] = client.Subscribe(ctx, channel)
+		r.localSubs[channel] = map[chan string]bool{}
+		r.Set(channel, NewGameState())
+
+		go func() {
+			for msg := range r.remoteSubs[channel].Channel() {
+				r.pubLocal(msg.Payload, channel, nil)
+			}
+		}()
+	}
+	r.localSubs[channel][ch] = true
+
 	return ch
 }
-func (r *RedisStateManager) Unsub(channel string) bool {
+func (r *RedisStateManager) Unsub(channel string, in chan string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	sub, ok := r.subs[channel]
-	if !ok {
-		return false
+	select {
+	case _, ok := <-in:
+		if ok {
+			close(in)
+		}
+	default:
+		if in != nil {
+			close(in)
+		}
 	}
-
-	sub.Close()
-
-	return true
+	delete(r.localSubs[channel], in)
+	if len(r.localSubs[channel]) == 0 {
+		r.remoteSubs[channel].Close()
+		r.Del(channel)
+		delete(r.localSubs, channel)
+		delete(r.remoteSubs, channel)
+	}
 }
-func (r *RedisStateManager) Pub(msg, channel string) bool {
+func (r *RedisStateManager) pubLocal(msg, channel string, in chan string) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	for ch := range r.localSubs[channel] {
+		if ch != in {
+			ch <- msg
+		}
+	}
+}
+func (r *RedisStateManager) Pub(msg, channel string, in chan string) bool {
 	err := client.Publish(ctx, channel, msg).Err()
+	r.pubLocal(msg, channel, in)
+
 	return err == nil
 }

@@ -85,7 +85,7 @@ type StateManager interface {
 	Del(key string) bool
 
 	Sub(channel string) chan string
-	Unsub(channel string, in chan string) bool
+	Unsub(channel string, in chan string)
 	Pub(msg, channel string, in chan string) bool
 }
 
