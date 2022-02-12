@@ -183,6 +183,7 @@ gameLoop:
 				continue
 			}
 
+			updateTime()
 			var actual chess.Move
 			for _, legal := range board.Moves() {
 				if !legal.Matches(move) {
@@ -211,8 +212,8 @@ gameLoop:
 			state.FEN = board.String()
 			state.SideToMove = board.SideToMove
 			state.History = append(state.History, actual.String())
+			state.TimeOfLastMove = time.Now().UnixMilli()
 
-			updateTime()
 			notify()
 		}
 	}
