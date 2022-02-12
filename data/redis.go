@@ -18,10 +18,9 @@ var client *redis.Client
 
 func init() {
 	ctx = context.Background()
-	host, port, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
+	host := os.Getenv("REDISHOST")
 	client = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%v:%v", host, port),
-		Password: pass,
+		Addr: fmt.Sprintf("%v:6379", host),
 	})
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
