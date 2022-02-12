@@ -65,7 +65,6 @@ awaitGame:
 
 		id = ""
 		if msg.Cmd == "JOIN" {
-			fmt.Println(msg)
 			if msg.Args[0] == "" {
 				comm.send("DENY", "no room code provided")
 				continue
@@ -92,7 +91,6 @@ awaitGame:
 		}
 	}
 	comm.send("IN", code, id)
-	println(id, in)
 	state, side := manager.Get(code), chess.White
 	if state.Players[1].ID == id {
 		side = chess.Black

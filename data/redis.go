@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
 	"sync"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -17,15 +17,16 @@ var client *redis.Client
 
 func init() {
 	ctx = context.Background()
-	host, port, pass := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
+	host, port, pass := "localhost", "6379", "" // os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASS")
 	client = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%v:%v", host, port),
 		Password: pass,
 	})
-	log.Println(client)
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
-		log.Fatal("failed to connect to redis server", err)
+		log.Fatal("failed to connect to redis server ", err)
+	} else {
+		log.Println("connected to redis server")
 	}
 }
 
@@ -49,7 +50,7 @@ func (r *RedisStateManager) genKey() string {
 	var num int
 	var key string
 	for {
-		num = rand.Intn(1 << 4 * 5) // 2^(4bits*#digits)
+		num = rand.Intn(1 << (4 * 5)) // 2^(4bits*#digits)
 		key = fmt.Sprintf("%05X", num)
 
 		if _, ok := r.remoteSubs[key]; !ok {
@@ -73,7 +74,7 @@ func (r *RedisStateManager) Get(key string) *GameState {
 }
 func (r *RedisStateManager) Set(key string, state *GameState) bool {
 	val := state.String()
-	_, err := client.Set(ctx, key, string(val), 1200).Result()
+	_, err := client.Set(ctx, key, string(val), 1200*time.Second).Result()
 	return err == nil
 }
 func (r *RedisStateManager) Del(key string) bool {
@@ -117,8 +118,10 @@ func (r *RedisStateManager) Unsub(channel string, in chan string) {
 	}
 	delete(r.localSubs[channel], in)
 	if len(r.localSubs[channel]) == 0 {
-		r.remoteSubs[channel].Close()
-		r.Del(channel)
+		if r.remoteSubs[channel] != nil {
+			r.remoteSubs[channel].Close()
+			r.Del(channel)
+		}
 		delete(r.localSubs, channel)
 		delete(r.remoteSubs, channel)
 	}

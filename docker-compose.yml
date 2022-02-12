@@ -5,13 +5,3 @@ services:
     image: redis:alpine
     ports:
       - ${REDIS_PORT-6379}:6379
-  web:
-    build: .
-    container_name: blind-chess
-    ports:
-      - ${PORT-80}:80
-    environment:
-      - PORT=80
-      - REDIS_PORT=6379
-      - REDIS_HOST=${REDIS_HOST-localhost}
-      - REDIS_PASS=${REDIS_PASS}
