@@ -1,6 +1,6 @@
 # Blind Chess
 <p align="center">
-  <img src="images/preview.png" width="400px" alt="logo and preview" />
+  <img src="images/preview.png" alt="logo and preview" />
 </p>
 
 ## Table of Contents
