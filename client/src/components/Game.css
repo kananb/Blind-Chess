@@ -67,6 +67,11 @@
 	justify-content: center;
 	align-items: center;
 }
+.notification .leave {
+	width: 30%;
+	height: 2em;
+	margin: 2em auto 0;
+}
 
 .moves {
 	width: 100%;

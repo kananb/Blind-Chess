@@ -153,6 +153,10 @@ function Game(props) {
 			<div className="notification">
 				<h3>Game Over</h3>
 				{ message }
+				<button class="leave" onClick={() => {
+					if (conn) conn.send("QUIT");
+					onLeave();
+				}}>Leave</button>
 			</div>
 		);
 	}
