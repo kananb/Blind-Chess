@@ -1,6 +1,6 @@
 # Blind Chess
 <p align="center">
-  <img src="images/preview.png" alt="logo and preview" />
+  <img src="images/titlecard.png" alt="logo and preview" />
 </p>
 
 ## Table of Contents
@@ -30,8 +30,11 @@ A blind chess training website built for honing your board awareness and calcula
 
 ## Features
 ### Creating and joining game rooms
+Play with a friend by creating a room or joining theirs. Rooms identified by five character room codes that are easy to copy and paste or relay over VOIP.
 ### Customizable time control
+With the ability to choose the duration and increment of your game you can turn up the heat with some blitz matches or take your time calculating with some classical or rapid. You can also choose which side you start with if you have a particular opening you want to practice.
 ### FEN/PGN for post-game analysis
+Since all of the moves in your game are stored, after you're done playing you can click a link and access a [Lichess analysis board](https://lichess.org/analysis) of the final position. Load in the PGN of the game too to analyze your game using the [Stockfish](https://stockfishchess.org/) chess engine and see how the tides of the game turned.
 
 ## Installation
 ### Clone the repo
