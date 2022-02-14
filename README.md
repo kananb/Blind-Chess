@@ -1,11 +1,10 @@
 # Blind Chess
 <p align="center">
-  <img src="preview.png" alt="logo and preview" />
+  <img src="images/preview.png" width="400px" alt="logo and preview" />
 </p>
 
 ## Table of Contents
 * [About](#about)
-* [Try it out](#try-it-out)
 * [Features](#features)
 * [Installation](#installation)
 * [How it works](#how-it-works)
@@ -13,7 +12,8 @@
 
 ## About
 ### Description
-A blind chess training website built for honing 
+A blind chess training website built for honing your board awareness and calculation abilities.
+[Try it out](https://mind-chess-kbg6defxyq-uw.a.run.app/)!
 ### Technologies
 * Frontend:
   * Built with [React](https://reactjs.org/)
@@ -25,22 +25,29 @@ A blind chess training website built for honing
   * And [go-redis](https://github.com/go-redis/redis) for interfacing with the Redis database
 * Database:
   * Utilizing [Redis](https://redis.io/) for high-performance data synchronization across server instances
-
-## Try it out
-[Check out the site](https://mind-chess-kbg6defxyq-uw.a.run.app/) hosted live on Google Cloud
+* Other:
+  * Containerized with [Docker](https://www.docker.com/)
 
 ## Features
 ### Creating and joining game rooms
 ### Customizable time control
-### PGN
+### FEN/PGN for post-game analysis
 
 ## Installation
-1. Clone the repo
+### Clone the repo
 ```
 git clone github.com/kananb/Blind-Chess.git
 ```
-2. Install modules and packages
+### Run locally
+Before continuing, make sure you have [Docker](https://www.docker.com/) installed.
+Replace `${PORT}` with whichever port you want to run the web-service on.
+#### Using Redis
 ```
+docker-compose up -f docker-compose.redis.yml --env PORT=${PORT}
+```
+#### Without Redis (in-memory storage)
+```
+docker-compose up --env PORT=${PORT}
 ```
 
 ## How it works
