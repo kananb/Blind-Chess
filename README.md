@@ -12,8 +12,10 @@
 
 ## About
 ### Description
-A blind chess training website built for honing your board awareness and calculation abilities.
-[Try it out](https://mind-chess-kbg6defxyq-uw.a.run.app/)!
+A blind chess training website built for honing your board awareness and calculation abilities. [Blind chess](https://en.wikipedia.org/wiki/Blindfold_chess) is a variant of the game in which you don't see any of the pieces on the board and instead make your moves using a chess notation like [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)).
+
+[Start playing](https://mind-chess-kbg6defxyq-uw.a.run.app/) on this live site, deployed to Google Cloud!
+
 ### Technologies
 * Frontend:
   * Built with [React](https://reactjs.org/)
@@ -43,14 +45,17 @@ git clone github.com/kananb/Blind-Chess.git
 ```
 ### Run locally
 Before continuing, make sure you have [Docker](https://www.docker.com/get-started) installed.
+```
+echo PORT=${PORT} > .env
+```
 Replace `${PORT}` with whichever port you want to run the web-service on.
 #### Using Redis
 ```
-docker-compose up -f docker-compose.redis.yml --env PORT=${PORT}
+docker-compose -f docker-compose.redis.yml up
 ```
 #### Without Redis (in-memory storage)
 ```
-docker-compose up --env PORT=${PORT}
+docker-compose up
 ```
 
 ## How it works
