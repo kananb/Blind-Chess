@@ -18,7 +18,11 @@ var client *redis.Client
 
 func init() {
 	ctx = context.Background()
-	host := os.Getenv("REDISHOST")
+	host, present := os.LookupEnv("REDISHOST")
+	if !present {
+		return
+	}
+
 	client = redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%v:6379", host),
 	})

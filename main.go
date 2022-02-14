@@ -10,7 +10,6 @@ import (
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
-	// os.Setenv("PORT", "80")
 
 	router := gin.Default()
 	staticPath := "./client/build/"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,11 @@ var upgrader = websocket.Upgrader{
 var manager data.ChessManager
 
 func init() {
-	manager = data.NewChessManager(data.NewRedisStateManager())
+	if _, present := os.LookupEnv("REDISHOST"); present {
+		manager = data.NewChessManager(data.NewRedisStateManager())
+	} else {
+		manager = data.NewChessManager(data.NewMemoryStateManager())
+	}
 }
 
 func handleWebsocket(c *gin.Context) {
