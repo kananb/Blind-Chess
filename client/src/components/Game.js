@@ -120,7 +120,7 @@ function Game(props) {
 	};
 
 	let info = undefined;
-	if (game.FEN) {
+	if (game.FEN && game.Result) {
 		info = (
 			<div className="positionInfo">
 				<a className="fen" href={`https://lichess.org/analysis/standard/${game.FEN}`} target="_blank" rel="noopener noreferrer">{game.FEN}</a>
