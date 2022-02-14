@@ -14,9 +14,10 @@ COPY game ./game
 COPY data ./data
 RUN go build -o blind-chess
 
-# copy react build
-COPY client/build ./client/build
+# copy and build react code
+FROM node:alpine
+COPY client ./client
+RUN npm --prefix client install
+RUN npm --prefix client run build
 
-ENV PORT 80
-EXPOSE 80
 CMD [ "./blind-chess" ]
