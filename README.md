@@ -39,7 +39,7 @@ A blind chess training website built for honing your board awareness and calcula
 git clone github.com/kananb/Blind-Chess.git
 ```
 ### Run locally
-Before continuing, make sure you have [Docker](https://www.docker.com/) installed.
+Before continuing, make sure you have [Docker](https://www.docker.com/get-started) installed.
 Replace `${PORT}` with whichever port you want to run the web-service on.
 #### Using Redis
 ```
