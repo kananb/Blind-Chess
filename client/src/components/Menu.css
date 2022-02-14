@@ -52,6 +52,9 @@
 	justify-content: center;
 	align-items: center;
 }
+.joinForm .error {
+	text-align: center;
+}
 .joinForm input {
 	text-align: center;
 
