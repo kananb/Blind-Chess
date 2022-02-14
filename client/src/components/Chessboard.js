@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function Chessboard(props) {
 	const [orientation, setOrientation] = useState("white");
+	const [show, setShow] = useState(true);
 	const board = [];
 
 	const ranks = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -11,8 +12,8 @@ function Chessboard(props) {
 			const off = r&1 ? 1 : 0;
 			const color = (r*8+c+off)&1 ? "dark" : "light";
 
-			const file = r === 7 ? (orientation === "white" ? ranks[c] : ranks[7-c]) : "";
-			const rank = c === 0 ? (orientation === "white" ? (8-r) : r+1) : "";
+			const file = (show && r === 7) ? (orientation === "white" ? ranks[c] : ranks[7-c]) : "";
+			const rank = (show && c === 0) ? (orientation === "white" ? (8-r) : r+1) : "";
 			squares.push(
 				<td key={c} className={ "square "+color }>
 					<div className="rank">
@@ -39,6 +40,9 @@ function Chessboard(props) {
 			setOrientation("white");
 		}
 	};
+	const toggleCoords = () => {
+		setShow(!show);
+	};
 
 	return (
 		<div className="Chessboard">
@@ -48,7 +52,12 @@ function Chessboard(props) {
 				</tbody>
 			</table>
 			<div className="controls">
-				<button className="flip" onClick={flipBoard}>flip</button>
+				<button className="flip" onClick={flipBoard}>
+					flip
+				</button>
+				<button className="hide" onClick={toggleCoords}>
+					{ show ? "hide coords" : "show coords" }
+				</button>
 			</div>
 		</div>
 	);
